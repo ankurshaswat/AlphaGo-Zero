@@ -15,7 +15,7 @@ class GoBoard():
     Wrapper over board class to modify representations and return new copies.
     """
 
-    def __init__(self, board_size, board=None, player=-1, done=False, last_passed=False, history=[0, 0, 0, 0]):
+    def __init__(self, board_size, board=None, player=-1, done=False, last_passed=False, history=None):
         self.board_size = board_size
 
         self.pass_action = board_size**2
@@ -26,7 +26,11 @@ class GoBoard():
         self.curr_player = player
         self.done = done
         self.last_passed = last_passed
-        self.history = history
+
+        if history is None:
+            self.history = [0]*7
+        else:
+            self.history = history
 
         if board is None:
             self.board = pachi_py.CreateBoard(board_size)
@@ -38,9 +42,9 @@ class GoBoard():
         Converts Pachi coordinates to actions
         """
         if action_coord == pachi_py.PASS_COORD:
-            return self.get_pass_action()
+            return self.pass_action
         if action_coord == pachi_py.RESIGN_COORD:
-            return self.get_resign_action()
+            return self.resign_action
         i, j = self.board.coord_to_ij(action_coord)
         return i*self.board_size + j
 
@@ -48,9 +52,9 @@ class GoBoard():
         """
         Converts actions to Pachi coordinates
         """
-        if action == self.get_pass_action():
+        if action == self.pass_action:
             return pachi_py.PASS_COORD
-        if action == self.get_resign_action():
+        if action == self.resign_action:
             return pachi_py.RESIGN_COORD
         return self.board.ij_to_coord(action // self.board_size, action % self.board_size)
 
@@ -73,11 +77,11 @@ class GoBoard():
 
         curr_player = pachi_py.BLACK if player == -1 else pachi_py.WHITE
 
-        if action == self.get_pass_action():
+        if action == self.pass_action:
             last_passed = True
             done = self.last_passed
             new_board = self.board.play(pachi_py.PASS_COORD, curr_player)
-        elif action == self.get_resign_action():
+        elif action == self.resign_action:
             done = True
             new_board = self.board.play(pachi_py.RESIGN_COORD, curr_player)
         else:
@@ -85,7 +89,7 @@ class GoBoard():
             new_board = self.board.play(
                 self.board.ij_to_coord(a_x, a_y), curr_player)
 
-        new_history = self.board + self.history[:3]
+        new_history = self.board + self.history[:6]
 
         return GoBoard(self.board_size, new_board, -1*player, done, last_passed, new_history)
 
