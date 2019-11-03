@@ -15,45 +15,79 @@ class GoBoard():
     Wrapper over board class to modify representations and return new copies.
     """
 
-    def __init__(self, board_size, board=None):
+    def __init__(self, board_size, board=None, player=-1, done=False, last_passed=False, history=[0, 0, 0, 0]):
         self.board_size = board_size
+
+        self.pass_action = board_size**2
+        self.resign_action = board_size**2 + 1
+
+        assert player in [-1, 1]
+
+        self.curr_player = player
+        self.done = done
+        self.last_passed = last_passed
+        self.history = history
+
         if board is None:
             self.board = pachi_py.CreateBoard(board_size)
         else:
             self.board = board
 
-    def get_pass_action(self):
+    def coord_to_action(self, action_coord):
         """
-        Get representation for pass action
+        Converts Pachi coordinates to actions
         """
+        if action_coord == pachi_py.PASS_COORD:
+            return self.get_pass_action()
+        if action_coord == pachi_py.RESIGN_COORD:
+            return self.get_resign_action()
+        i, j = self.board.coord_to_ij(action_coord)
+        return i*self.board_size + j
 
-        return self.board_size**2
-
-    def get_resign_action(self):
+    def action_to_coord(self, action):
         """
-        Get representation for resign action
+        Converts actions to Pachi coordinates
         """
+        if action == self.get_pass_action():
+            return pachi_py.PASS_COORD
+        if action == self.get_resign_action():
+            return pachi_py.RESIGN_COORD
+        return self.board.ij_to_coord(action // self.board_size, action % self.board_size)
 
-        return self.board_size**2+1
+    def str_to_action(self, string):
+        """
+        Convert D6 type coordinates to  actions
+        """
+        return self.coord_to_action(self.board.str_to_coord(string.encode()))
 
     def execute_move(self, action, player):
         """
         Execute a move on pachi py board and return the obtained
         board(assuming copy has been created)
         """
+        assert not self.done
+        assert player == self.curr_player
+
+        done = False
+        last_passed = False
 
         curr_player = pachi_py.BLACK if player == -1 else pachi_py.WHITE
 
         if action == self.get_pass_action():
+            last_passed = True
+            done = self.last_passed
             new_board = self.board.play(pachi_py.PASS_COORD, curr_player)
         elif action == self.get_resign_action():
+            done = True
             new_board = self.board.play(pachi_py.RESIGN_COORD, curr_player)
         else:
             a_x, a_y = action // self.board_size, action % self.board_size
             new_board = self.board.play(
                 self.board.ij_to_coord(a_x, a_y), curr_player)
 
-        return GoBoard(self.board_size, new_board)
+        new_history = self.board + self.history[:3]
+
+        return GoBoard(self.board_size, new_board, -1*player, done, last_passed, new_history)
 
     def get_legal_moves(self, player):
         """
@@ -99,3 +133,29 @@ class GoBoard():
             return True
 
         return False
+
+    def __repr__(self):
+        color_to_play = 'Black' if self.curr_player == -1 else 'White'
+        return 'To play: {}\n{}'.format(color_to_play, self.board.__repr__().decode())
+
+    def is_terminal(self):
+        """
+        Check if state is terminal (double pass or resign)
+        """
+        board_terminal = self.board.is_terminal
+        self_check = self.done
+
+        return board_terminal or self_check
+
+    def score(self, komi):
+        """
+        Score the board configuration
+        """
+        return self.board.official_score + komi
+
+    def get_numpy_form(self):
+        """
+        Convert into ML input form
+        """
+        # TODO : Append history here
+        return self.board.encode()

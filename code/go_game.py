@@ -10,8 +10,9 @@ class GoGame:
     Game class to use board and perform required operations for training.
     """
 
-    def __init__(self, board_size):
+    def __init__(self, board_size, komi):
         self.board_size = board_size
+        self.komi = komi
 
     def getInitBoard(self):
         """
@@ -64,21 +65,18 @@ class GoGame:
         Check if game has ended and who has won
         """
 
-        if not board.is_terminal:
+        if not board.is_terminal():
             return 0
 
         # -1 BLACK(1) 1 WHITE(2)
-        if player == 1:
-            return board.fast_score > 0
-
-        return board.fast_score < 0
-
+        return self.decide_winner()
+        
     def getCanonicalForm(self, board, player):
         """
         ???????????
         """
         # TODO : Need to see what exactly is done here
-        return board.encode()
+        return board.get_numpy_form()
 
     def getSymmetries(self, board, pi):
         """
@@ -101,4 +99,16 @@ class GoGame:
         # Official Score is positive if white is winning
         # White is player 1
         # Black is player -1
-        return player * board.official_score
+
+        return player * board.score(self.komi)
+
+    def decide_winner(self, board):
+        """
+        Decide on the winner according to current board.
+        """
+        score = board.score(self.komi)
+
+        if score == 0:
+            return 0
+
+        return 1 if score > 0 else -1
