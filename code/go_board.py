@@ -89,7 +89,7 @@ class GoBoard():
             new_board = self.board.play(
                 self.board.ij_to_coord(a_x, a_y), curr_player)
 
-        new_history = self.board + self.history[:6]
+        new_history = [self.board] + self.history[:6]
 
         return GoBoard(self.board_size, new_board, -1*player, done, last_passed, new_history)
 
@@ -98,7 +98,7 @@ class GoBoard():
         Iterate and find out legal position moves
         """
 
-        board_arr = self.board.encoded()
+        board_arr = self.board.encode()
 
         legal_moves = []
 
