@@ -161,5 +161,15 @@ class GoBoard():
         """
         Convert into ML input form
         """
-        # TODO : Append history here
-        return self.board.encode()
+        history_reps = []
+
+        stones = self.board.encode()
+        history_reps.append(stones[:2, :, :])
+
+        for board in self.history:
+            stones = board.encode()
+            history_reps.append(stones[:2, :, :])
+
+        combined = np.concatenate(history_reps,axis=0)
+
+        return combined
