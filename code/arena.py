@@ -19,9 +19,9 @@ if __name__ == "__main__":
                 possible_actions.append(action)
 
         selected_action = random.choice(possible_actions)        
-        print(selected_action)
-        print(board)
-        print(board.board.get_legal_coords(1))
-        print(board.board.get_legal_coords(2))
+        # print(selected_action)
+        # print(board)
+        # print(board.board.get_legal_coords(1))
+        # print(board.board.get_legal_coords(2))
         (board,player) = game.getNextState(board,player,selected_action)
-
+        print(game.get_numpy_rep(board).shape)

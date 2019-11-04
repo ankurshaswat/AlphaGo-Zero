@@ -28,7 +28,7 @@ class GoBoard():
         self.last_passed = last_passed
 
         if history is None:
-            self.history = [0]*7
+            self.history = [None]*6
         else:
             self.history = history
 
@@ -90,7 +90,7 @@ class GoBoard():
                 self.board.ij_to_coord(a_x, a_y), curr_player)
 
         new_history = [self.board] + self.history[:6]
-
+        # print(len(new_history))
         return GoBoard(self.board_size, new_board, -1*player, done, last_passed, new_history)
 
     def get_legal_moves(self, player):
@@ -166,10 +166,15 @@ class GoBoard():
         stones = self.board.encode()
         history_reps.append(stones[:2, :, :])
 
+        # print(len(self.history))
+
         for board in self.history:
-            stones = board.encode()
+            if board is None:
+                stones = np.zeros((2,self.board_size, self.board_size))
+            else:
+                stones = board.encode()
             history_reps.append(stones[:2, :, :])
 
-        combined = np.concatenate(history_reps,axis=0)
-
+        combined = np.concatenate(history_reps, axis=0)
+        # print(combined.shape)
         return combined
