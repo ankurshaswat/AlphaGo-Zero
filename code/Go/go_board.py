@@ -15,7 +15,8 @@ class GoBoard():
     Wrapper over board class to modify representations and return new copies.
     """
 
-    def __init__(self, board_size, board=None, player=-1, done=False, last_passed=False, history=None):
+    def __init__(self, board_size, board=None,
+                 player=-1, done=False, last_passed=False, history=None):
         self.board_size = board_size
 
         self.pass_action = board_size**2
@@ -28,7 +29,7 @@ class GoBoard():
         self.last_passed = last_passed
 
         if history is None:
-            self.history = [None]*6
+            self.history = [None]*7
         else:
             self.history = history
 
@@ -138,9 +139,13 @@ class GoBoard():
 
         return False
 
-    def __repr__(self):
+    def print_board(self):
+        """
+        Show complete game state.
+        """
         color_to_play = 'Black' if self.curr_player == -1 else 'White'
-        return 'To play: {}\n{}'.format(color_to_play, self.board.__repr__().decode())
+        print('To play: {}\n{}'.format(
+            color_to_play, self.board.__repr__().decode()))
 
     def is_terminal(self):
         """
@@ -157,24 +162,39 @@ class GoBoard():
         """
         return self.board.official_score + komi
 
-    def get_numpy_form(self):
+    def get_numpy_form(self, history, player):
         """
         Convert into ML input form
         """
         history_reps = []
 
         stones = self.board.encode()
-        history_reps.append(stones[:2, :, :])
 
+        if player is None or player == -1:
+            history_reps.append(stones[:2, :, :])
+        else:
+            history_reps.append(stones[1, :, :])
+            history_reps.append(stones[0, :, :])
+
+        # print(self.board.__repr__())
         # print(len(self.history))
 
-        for board in self.history:
-            if board is None:
-                stones = np.zeros((2,self.board_size, self.board_size))
-            else:
-                stones = board.encode()
-            history_reps.append(stones[:2, :, :])
+        if history:
+            for board in self.history:
+                if board is None:
+                    stones = np.zeros((2, self.board_size, self.board_size))
+                else:
+                    # print(board.__repr__())
+                    stones = board.encode()
+
+                if player is None or player == -1:
+                    history_reps.append(stones[:2, :, :])
+                else:
+                    history_reps.append(stones[1, :, :])
+                    history_reps.append(stones[0, :, :])
 
         combined = np.concatenate(history_reps, axis=0)
         # print(combined.shape)
-        return combined
+        combined_in_order = np.transpose(combined, (1, 2, 0))
+
+        return combined_in_order

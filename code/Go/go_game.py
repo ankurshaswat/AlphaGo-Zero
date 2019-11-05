@@ -1,6 +1,7 @@
 """
 Game board environment manager
 """
+import random
 
 import numpy as np
 
@@ -51,16 +52,16 @@ class GoGame:
         Get valid moves over whole board
         """
 
-        validMoveIndicator = [0]*self.getActionSpaceSize()
-        legalMoves = board.get_legal_moves(player)
+        valid_move_indicator = [0]*self.getActionSpaceSize()
+        legal_moves = board.get_legal_moves(player)
 
-        validMoveIndicator[-1] = 1
-        validMoveIndicator[-2] = 1
+        valid_move_indicator[-1] = 1
+        valid_move_indicator[-2] = 1
 
-        for action in legalMoves:
-            validMoveIndicator[action] = 1
+        for action in legal_moves:
+            valid_move_indicator[action] = 1
 
-        return validMoveIndicator
+        return np.asarray(valid_move_indicator)
 
     def getGameEnded(self, board, player):
         """
@@ -75,15 +76,11 @@ class GoGame:
         # -1 if player has lost
         return self.decide_winner(board, player)
 
-    def get_numpy_rep(self,board):
-        return board.get_numpy_form()
-
-    # def getCanonicalForm(self, board, player):
-    #     """
-    #     ???????????
-    #     """
-    #     # TODO : Need to see what exactly is done here
-        # return board.get_numpy_form()
+    def get_numpy_rep(self, board, player=None, history=True):
+        """
+        Get numpy representation of board.
+        """
+        return board.get_numpy_form(player, history)
 
     def getSymmetries(self, board, pi_, player=None, history=True):
         """
@@ -120,6 +117,12 @@ class GoGame:
         """
         np_arr = self.get_numpy_rep(board, player, history)
         return self.convert_np_to_string(np_arr)
+
+    def convert_np_to_string(self, np_arr):
+        """
+        Convert an already generated numpy_representation to string.
+        """
+        return "".join(str(x) for x in np_arr.ravel())
 
     def getScore(self, board, player):
         """
