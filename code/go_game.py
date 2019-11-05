@@ -51,16 +51,16 @@ class GoGame:
         Get valid moves over whole board
         """
 
-        validMoveIndicator = [0]*self.getActionSpaceSize()
-        legalMoves = board.get_legal_moves(player)
+        valid_move_indicator = [0]*self.getActionSpaceSize()
+        legal_moves = board.get_legal_moves(player)
 
-        validMoveIndicator[-1] = 1
-        validMoveIndicator[-2] = 1
+        valid_move_indicator[-1] = 1
+        valid_move_indicator[-2] = 1
 
-        for action in legalMoves:
-            validMoveIndicator[action] = 1
+        for action in legal_moves:
+            valid_move_indicator[action] = 1
 
-        return validMoveIndicator
+        return np.asarray(valid_move_indicator)
 
     def getGameEnded(self, board, player):
         """
@@ -75,23 +75,19 @@ class GoGame:
         # -1 if player has lost
         return self.decide_winner(board, player)
 
-    def get_numpy_rep(self,board):
-        return board.get_numpy_form()
+    def get_numpy_rep(self, board, player=None, history=True):
+        """
+        Get numpy representation of board.
+        """
+        return board.get_numpy_form(player, history)
 
-    # def getCanonicalForm(self, board, player):
-    #     """
-    #     ???????????
-    #     """
-    #     # TODO : Need to see what exactly is done here
-        # return board.get_numpy_form()
-
-    def getSymmetries(self, numpy_board, pi, rot_num, flip):
+    def getSymmetries(self, numpy_board, pi_, rot_num, flip):
         """
         Randomly generate symmetries
         """
         assert rot_num in [0, 1, 2, 3]
-        assert(len(pi) == self.board_size**2 + 2)
-        pi_2d = np.reshape(pi[:-2], (self.board_size, self.board_size))
+        assert len(pi_) == self.board_size**2 + 2
+        pi_2d = np.reshape(pi_[:-2], (self.board_size, self.board_size))
 
         if rot_num > 0:
             new_board = np.rot90(numpy_board, rot_num)
@@ -104,14 +100,21 @@ class GoGame:
             new_board = np.fliplr(new_board)
             new_pi = np.fliplr(new_pi)
 
-        return new_board, list(new_pi.ravel()) + pi[-2:]
+        return new_board, list(new_pi.ravel()) + pi_[-2:]
 
-    def stringRepresentation(self, board):
+    def stringRepresentation(self, board, player=None, history=True):
         """
-        Get representation of state as string
+        Get representation of state as string.
+        Only concat of board_size*board_size*16 array is returned.
         """
-        # TODO
-        return board.tostring()
+        np_arr = self.get_numpy_rep(board, player, history)
+        return self.convert_np_to_string(np_arr)
+
+    def convert_np_to_string(self, np_arr):
+        """
+        Convert an already generated numpy_representation to string.
+        """
+        return "".join(str(x) for x in np_arr.ravel())
 
     def getScore(self, board, player):
         """
