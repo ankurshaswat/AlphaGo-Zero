@@ -1,5 +1,8 @@
 import random 
 from go_game import GoGame
+import numpy
+import sys
+numpy.set_printoptions(threshold=sys.maxsize)
 
 if __name__ == "__main__":
     game = GoGame(13,5.5)
@@ -24,4 +27,5 @@ if __name__ == "__main__":
         # print(board.board.get_legal_coords(1))
         # print(board.board.get_legal_coords(2))
         (board,player) = game.getNextState(board,player,selected_action)
-        print(game.get_numpy_rep(board).shape)
+
+        # print(game.get_numpy_rep(board))

@@ -165,16 +165,18 @@ class GoBoard():
 
         stones = self.board.encode()
         history_reps.append(stones[:2, :, :])
-
+        # print(self.board.__repr__())
         # print(len(self.history))
 
         for board in self.history:
             if board is None:
                 stones = np.zeros((2,self.board_size, self.board_size))
             else:
+                # print(board.__repr__())
                 stones = board.encode()
             history_reps.append(stones[:2, :, :])
 
         combined = np.concatenate(history_reps, axis=0)
         # print(combined.shape)
-        return combined
+        combined_in_order = np.transpose(combined,(1,2,0))
+        return combined_in_order
