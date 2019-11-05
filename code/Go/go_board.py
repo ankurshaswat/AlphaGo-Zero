@@ -104,12 +104,16 @@ class GoBoard():
 
         board_arr = self.board.encode()
 
+        curr_player = pachi_py.BLACK if player == -1 else pachi_py.WHITE
+
+        init_legal_coords = self.board.get_legal_coords(curr_player)
+
         legal_moves = []
 
-        for pos_x in range(self.board_size):
-            for pos_y in range(self.board_size):
-                if self.is_legal_action(board_arr, (pos_x, pos_y), player):
-                    legal_moves.append(self.board_size*pos_x + pos_y)
+        for coord in init_legal_coords:
+            pos_x, pos_y = self.board.coord_to_ij(coord)
+            if self.is_legal_action(board_arr, (pos_x, pos_y), player):
+                legal_moves.append(self.board_size*pos_x + pos_y)
 
         return legal_moves
 

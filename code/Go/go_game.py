@@ -61,10 +61,10 @@ class GoGame:
         valid_move_indicator[-1] = 0
         valid_move_indicator[-2] = 0
 
-        for action in legal_moves:
-            valid_move_indicator[action] = 1
-
-        return np.asarray(valid_move_indicator)
+        valid_move_indicator = np.asarray(valid_move_indicator)
+        valid_move_indicator[legal_moves] = 1
+        print(valid_move_indicator)
+        return valid_move_indicator
 
     def getGameEnded(self, board, player):
         """
