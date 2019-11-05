@@ -5,7 +5,7 @@ import random
 
 import numpy as np
 
-from go_board import GoBoard as Board
+from Go.go_board import GoBoard as Board
 
 
 class GoGame:
@@ -43,8 +43,10 @@ class GoGame:
         """
         Take action and get new board
         """
-
+        print(player, action)
         new_board = board.execute_move(action, player)
+        # new_board.print_board()
+        # xx = input()
         return (new_board, -player)
 
     def getValidMoves(self, board, player):
@@ -55,8 +57,9 @@ class GoGame:
         valid_move_indicator = [0]*self.getActionSpaceSize()
         legal_moves = board.get_legal_moves(player)
 
-        valid_move_indicator[-1] = 1
-        valid_move_indicator[-2] = 1
+        # TODO : Reset this to original
+        valid_move_indicator[-1] = 0
+        valid_move_indicator[-2] = 0
 
         for action in legal_moves:
             valid_move_indicator[action] = 1
@@ -80,7 +83,7 @@ class GoGame:
         """
         Get numpy representation of board.
         """
-        return board.get_numpy_form(player, history)
+        return board.get_numpy_form(history, player)
 
     def getSymmetries(self, board, pi_, player=None, history=True):
         """
@@ -97,6 +100,8 @@ class GoGame:
         assert len(pi_) == self.board_size**2 + 2
         pi_2d = np.reshape(pi_[:-2], (self.board_size, self.board_size))
 
+        ret = []
+
         if rot_num > 0:
             new_board = np.rot90(numpy_board, rot_num)
             new_pi = np.rot90(pi_2d, rot_num)
@@ -108,7 +113,9 @@ class GoGame:
             new_board = np.fliplr(new_board)
             new_pi = np.fliplr(new_pi)
 
-        return new_board, list(new_pi.ravel()) + pi_[-2:]
+        ret.append((new_board, list(new_pi.ravel()) + pi_[-2:]))
+
+        return ret
 
     def stringRepresentation(self, board, player=None, history=True):
         """

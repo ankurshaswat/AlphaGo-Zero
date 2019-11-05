@@ -2,6 +2,7 @@ import math
 import numpy as np
 EPS = 1e-8
 
+
 class MCTS():
     """
     This class handles the MCTS tree.
@@ -32,18 +33,18 @@ class MCTS():
             self.search(board, player)
 
         s = self.game.stringRepresentation(board, player, history=False)
-        counts = [self.Nsa[(s,a)] if (s,a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
+        counts = [self.Nsa[(s, a)] if (
+            s, a) in self.Nsa else 0 for a in range(self.game.getActionSpaceSize())]
 
-        if temp==0:
+        if temp == 0:
             bestA = np.argmax(counts)
             probs = [0]*len(counts)
-            probs[bestA]=1
+            probs[bestA] = 1
             return probs
 
         counts = [x**(1./temp) for x in counts]
         probs = [x/float(sum(counts)) for x in counts]
         return probs
-
 
     def search(self, board, player):
         """
@@ -66,21 +67,22 @@ class MCTS():
         """
 
         #---string representation of board--#
-        s = self.game.stringRepresentation(board, player, history=False) #player independent repr, without any history
+        # player independent repr, without any history
+        s = self.game.stringRepresentation(board, player, history=False)
         #-----------------------------------#
 
-
         if s not in self.Es:
-            self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
-        if self.Es[s]!=0:
+            self.Es[s] = self.game.getGameEnded(board, player)
+        if self.Es[s] != 0:
             # terminal node
             return -self.Es[s]
 
         if s not in self.Ps:
             # leaf node
-            
+
             #---get board representation before feeding to neuralNet---#
-            board_repr= board.get_numpy_form(player, history=False) #pass player here as well, another option is to concat player to board repr
+            # pass player here as well, another option is to concat player to board repr
+            board_repr = self.game.get_numpy_rep(board, player, history=False)
             self.Ps[s], v = self.nnet.predict(board_repr)
             #------------------------------#
 
@@ -91,9 +93,9 @@ class MCTS():
                 self.Ps[s] /= sum_Ps_s    # renormalize
             else:
                 # if all valid moves were masked make all valid moves equally probable
-                
+
                 # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
-                # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.   
+                # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.
                 print("All valid moves were masked, do workaround.")
                 self.Ps[s] = self.Ps[s] + valids
                 self.Ps[s] /= np.sum(self.Ps[s])
@@ -107,12 +109,14 @@ class MCTS():
         best_act = -1
 
         # pick the action with the highest upper confidence bound
-        for a in range(self.game.getActionSize()):
+        for a in range(self.game.getActionSpaceSize()):
             if valids[a]:
-                if (s,a) in self.Qsa:
-                    u = self.Qsa[(s,a)] + self.args.cpuct*self.Ps[s][a]*math.sqrt(self.Ns[s])/(1+self.Nsa[(s,a)])
+                if (s, a) in self.Qsa:
+                    u = self.Qsa[(s, a)] + self.args.cpuct*self.Ps[s][a] * \
+                        math.sqrt(self.Ns[s])/(1+self.Nsa[(s, a)])
                 else:
-                    u = self.args.cpuct*self.Ps[s][a]*math.sqrt(self.Ns[s] + EPS)     # Q = 0 ?
+                    u = self.args.cpuct * \
+                        self.Ps[s][a]*math.sqrt(self.Ns[s] + EPS)     # Q = 0 ?
 
                 if u > cur_best:
                     cur_best = u
@@ -124,13 +128,14 @@ class MCTS():
 
         v = self.search(next_s, -player)
 
-        if (s,a) in self.Qsa:
-            self.Qsa[(s,a)] = (self.Nsa[(s,a)]*self.Qsa[(s,a)] + v)/(self.Nsa[(s,a)]+1)
-            self.Nsa[(s,a)] += 1
+        if (s, a) in self.Qsa:
+            self.Qsa[(s, a)] = (self.Nsa[(s, a)] *
+                                self.Qsa[(s, a)] + v)/(self.Nsa[(s, a)]+1)
+            self.Nsa[(s, a)] += 1
 
         else:
-            self.Qsa[(s,a)] = v
-            self.Nsa[(s,a)] = 1
+            self.Qsa[(s, a)] = v
+            self.Nsa[(s, a)] = 1
 
         self.Ns[s] += 1
         return -v

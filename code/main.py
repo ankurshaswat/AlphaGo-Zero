@@ -1,5 +1,5 @@
 from Coach import Coach
-from Go.go_game import OthelloGame as Game
+from Go.go_game import GoGame as Game
 from Go.pytorch.NNet import NNetWrapper as nn
 from utils import *
 

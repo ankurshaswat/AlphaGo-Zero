@@ -70,6 +70,7 @@ class GoBoard():
         Execute a move on pachi py board and return the obtained
         board(assuming copy has been created)
         """
+        # print(player,self.curr_player)
         assert not self.done
         assert player == self.curr_player
 
@@ -81,9 +82,11 @@ class GoBoard():
         if action == self.pass_action:
             last_passed = True
             done = self.last_passed
+            print('2 Passes Done')
             new_board = self.board.play(pachi_py.PASS_COORD, curr_player)
         elif action == self.resign_action:
             done = True
+            print('Someone Resigned')
             new_board = self.board.play(pachi_py.RESIGN_COORD, curr_player)
         else:
             a_x, a_y = action // self.board_size, action % self.board_size
@@ -166,6 +169,7 @@ class GoBoard():
         """
         Convert into ML input form
         """
+
         history_reps = []
 
         stones = self.board.encode()
@@ -173,28 +177,23 @@ class GoBoard():
         if player is None or player == -1:
             history_reps.append(stones[:2, :, :])
         else:
-            history_reps.append(stones[1, :, :])
-            history_reps.append(stones[0, :, :])
-
-        # print(self.board.__repr__())
-        # print(len(self.history))
+            history_reps.append(stones[1:2, :, :])
+            history_reps.append(stones[:1, :, :])
 
         if history:
             for board in self.history:
                 if board is None:
                     stones = np.zeros((2, self.board_size, self.board_size))
                 else:
-                    # print(board.__repr__())
                     stones = board.encode()
 
                 if player is None or player == -1:
                     history_reps.append(stones[:2, :, :])
                 else:
-                    history_reps.append(stones[1, :, :])
-                    history_reps.append(stones[0, :, :])
+                    history_reps.append(stones[1:2, :, :])
+                    history_reps.append(stones[:1, :, :])
 
         combined = np.concatenate(history_reps, axis=0)
-        # print(combined.shape)
         combined_in_order = np.transpose(combined, (1, 2, 0))
 
         return combined_in_order
