@@ -1,6 +1,7 @@
 """
 Game board environment manager
 """
+import random
 
 import numpy as np
 
@@ -81,10 +82,17 @@ class GoGame:
         """
         return board.get_numpy_form(player, history)
 
-    def getSymmetries(self, numpy_board, pi_, rot_num, flip):
+    def getSymmetries(self, board, pi_, player=None, history=True):
         """
         Randomly generate symmetries
         """
+        rot_num = random.randint(0, 3)
+        flip = random.randint(0, 1) == 1
+        numpy_board = self.get_numpy_rep(board, player, history)
+
+        return self.get_symmetries_numpy(numpy_board, pi_, rot_num, flip)
+
+    def get_symmetries_numpy(self, numpy_board, pi_, rot_num, flip):
         assert rot_num in [0, 1, 2, 3]
         assert len(pi_) == self.board_size**2 + 2
         pi_2d = np.reshape(pi_[:-2], (self.board_size, self.board_size))
