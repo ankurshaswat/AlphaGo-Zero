@@ -85,13 +85,20 @@ class GoGame:
     #     # TODO : Need to see what exactly is done here
         # return board.get_numpy_form()
 
-    def getSymmetries(self, numpy_board, pi, rot_num, flip):
+    def getSymmetries(self, board, pi_, player=None, history=True):
         """
         Randomly generate symmetries
         """
+        rot_num = random.randint(0, 3)
+        flip = random.randint(0, 1) == 1
+        numpy_board = self.get_numpy_rep(board, player, history)
+
+        return self.get_symmetries_numpy(numpy_board, pi_, rot_num, flip)
+
+    def get_symmetries_numpy(self, numpy_board, pi_, rot_num, flip):
         assert rot_num in [0, 1, 2, 3]
-        assert(len(pi) == self.board_size**2 + 2)
-        pi_2d = np.reshape(pi[:-2], (self.board_size, self.board_size))
+        assert len(pi_) == self.board_size**2 + 2
+        pi_2d = np.reshape(pi_[:-2], (self.board_size, self.board_size))
 
         if rot_num > 0:
             new_board = np.rot90(numpy_board, rot_num)
@@ -104,14 +111,15 @@ class GoGame:
             new_board = np.fliplr(new_board)
             new_pi = np.fliplr(new_pi)
 
-        return new_board, list(new_pi.ravel()) + pi[-2:]
+        return new_board, list(new_pi.ravel()) + pi_[-2:]
 
-    def stringRepresentation(self, board):
+    def stringRepresentation(self, board, player=None, history=True):
         """
-        Get representation of state as string
+        Get representation of state as string.
+        Only concat of board_size*board_size*16 array is returned.
         """
-        # TODO
-        return board.tostring()
+        np_arr = self.get_numpy_rep(board, player, history)
+        return self.convert_np_to_string(np_arr)
 
     def getScore(self, board, player):
         """
