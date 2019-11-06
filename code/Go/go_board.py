@@ -73,7 +73,8 @@ class GoBoard():
         # print(player,self.curr_player)
         assert not self.done
         assert player == self.curr_player
-
+        assert 0 <= action <= self.board_size**2 + 2
+        
         done = False
         last_passed = False
 
