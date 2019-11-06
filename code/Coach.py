@@ -43,6 +43,9 @@ class Coach():
         self.curPlayer = -1
         episodeStep = 0
 
+
+        maxSteps=13*13
+
         while True:
             episodeStep += 1
             # canonicalBoard = self.game.getCanonicalForm(board,self.curPlayer)
@@ -58,7 +61,10 @@ class Coach():
             action =  np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
 
-            r = self.game.getGameEnded(board, self.curPlayer)
+            if(episodeStep>=maxSteps):
+                r = self.game.decide_winner(board, self.curPlayer)
+            else:
+                r = self.game.getGameEnded(board, self.curPlayer)
 
             if r!=0:
                 return [(x[0],x[2],r*((-1)**(x[1]!=self.curPlayer))) for x in trainExamples]
@@ -120,8 +126,11 @@ class Coach():
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             print('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
+            # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x,  temp=0)),
+            #               lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
+            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x[0], x[1],  temp=0)),
+                          lambda x: np.argmax(nmcts.getActionProb(x[0], x[1], temp=0)), self.game)
+
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))

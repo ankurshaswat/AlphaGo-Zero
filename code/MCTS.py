@@ -43,6 +43,7 @@ class MCTS():
             return probs
 
         counts = [x**(1./temp) for x in counts]
+        # print(counts)
         probs = [x/float(sum(counts)) for x in counts]
         return probs
 
@@ -106,7 +107,7 @@ class MCTS():
 
         valids = self.Vs[s]
         cur_best = -float('inf')
-        best_act = -1
+        best_act = 169#-1
 
         # pick the action with the highest upper confidence bound
         for a in range(self.game.getActionSpaceSize()):

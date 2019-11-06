@@ -43,7 +43,7 @@ class GoGame:
         """
         Take action and get new board
         """
-        print(player, action)
+        # print(player, action)
         new_board = board.execute_move(action, player)
         # new_board.print_board()
         # xx = input()
@@ -63,7 +63,7 @@ class GoGame:
 
         valid_move_indicator = np.asarray(valid_move_indicator)
         valid_move_indicator[legal_moves] = 1
-        print(valid_move_indicator)
+        # print(valid_move_indicator)
         return valid_move_indicator
 
     def getGameEnded(self, board, player):
@@ -117,7 +117,7 @@ class GoGame:
 
         return ret
 
-    def stringRepresentation(self, board, player=None, history=True):
+    def stringRepresentation(self, board, player=None, history=False):
         """
         Get representation of state as string.
         Only concat of board_size*board_size*16 array is returned.
