@@ -117,7 +117,7 @@ class GoGame:
 
         return ret
 
-    def stringRepresentation(self, board, player=None, history=True):
+    def stringRepresentation(self, board, player=None, history=False):
         """
         Get representation of state as string.
         Only concat of board_size*board_size*16 array is returned.

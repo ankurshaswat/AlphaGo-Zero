@@ -34,28 +34,39 @@ class Arena():
                 draw result returned from the game that is neither 1, -1, nor 0.
         """
         players = [self.player2, None, self.player1]
-        curPlayer = 1
+        curPlayer = -1
         board = self.game.getInitBoard()
         it = 0
-        while self.game.getGameEnded(board, curPlayer)==0:
+
+        maxSteps=13*13#13*13*2
+
+
+        while self.game.getGameEnded(board, curPlayer)==0 and it<maxSteps:
             it+=1
             if verbose:
                 assert(self.display)
                 print("Turn ", str(it), "Player ", str(curPlayer))
                 self.display(board)
-            action = players[curPlayer+1](self.game.getCanonicalForm(board, curPlayer))
+            # action = players[curPlayer+1](self.game.getCanonicalForm(board, curPlayer))
+            # valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer),1)
 
-            valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer),1)
+            action = players[curPlayer+1]((board, curPlayer))
+            valids = self.game.getValidMoves(board, curPlayer)
+
+
 
             if valids[action]==0:
                 print(action)
                 assert valids[action] >0
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
-        if verbose:
-            assert(self.display)
-            print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
-            self.display(board)
-        return self.game.getGameEnded(board, 1)
+        if 1:#verbose:
+            # assert(self.display)
+            # print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
+            print("Game over: Turn ", str(it), "Result ", str(self.game.decide_winner(board, -1)))
+            # self.display(board)
+        # return self.game.getGameEnded(board, 1)
+        return self.game.decide_winner(board, -1)
+
 
     def playGames(self, num, verbose=False):
         """
