@@ -47,7 +47,7 @@ class GoGame:
         new_board = board.execute_move(action, player)
         # new_board.print_board()
         # xx = input()
-        return (new_board, -player)
+        return new_board
 
     def get_valid_move(self, board, player):
         """
@@ -95,28 +95,32 @@ class GoGame:
 
         return self.get_symmetries_numpy(numpy_board, pi_, rot_num, flip)
 
-    def get_symmetries_numpy(self, numpy_board, pi_, rot_num, flip):
-        """
-        Get symmetries using numpy board form
-        """
+    def get_symmetries_numpy(self, numpy_board, pi_, valids, rot_num, flip):
         assert rot_num in [0, 1, 2, 3]
         assert len(pi_) == self.board_size**2 + 2
         pi_2d = np.reshape(pi_[:-2], (self.board_size, self.board_size))
+        valids_2d= np.reshape(valids_[:-2], (self.board_size, self.board_size))
 
         ret = []
 
         if rot_num > 0:
             new_board = np.rot90(numpy_board, rot_num)
             new_pi = np.rot90(pi_2d, rot_num)
+            new_valids = np.rot90(valids_2d, rot_num)
+
+
         else:
             new_board = numpy_board
             new_pi = pi_2d
+            new_valids = valids_2d
+            
 
         if flip:
             new_board = np.fliplr(new_board)
             new_pi = np.fliplr(new_pi)
+            new_valids=np.flipr(new_valids)
 
-        ret.append((new_board, list(new_pi.ravel()) + pi_[-2:]))
+        ret.append((new_board, list(new_pi.ravel()) + pi_[-2:], list(new_valids.ravel()) + valids_[-2:]))
 
         return ret
 
