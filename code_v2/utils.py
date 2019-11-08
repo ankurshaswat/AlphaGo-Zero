@@ -45,9 +45,9 @@ def parse_args():
                         dest='batch_size', type=int, default=16)
     parser.add_argument('-numGamesPerSide', action='store',
                         dest='numGamesPerSide', type=int, default=2)
-    parser.add_argument('-new_model_path', action='store',
-                        dest='new_model_path', default='../models/model.pytorch')
     parser.add_argument('-best_model_path', action='store',
+                        dest='best_model_path', default='../models/best_model.pytorch')
+    parser.add_argument('-temp_model_path', action='store',
                         dest='best_model_path', default='../models/best_model.pytorch')
 
     args = parser.parse_args()

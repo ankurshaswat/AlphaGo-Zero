@@ -40,5 +40,17 @@ do
     echo "All threads of this batch complete."
 
     python train_net.py
+
+    i=1
+    while [[ $i -le $NUM_THREADS ]]
+    do
+        python compete_with_best.py -thread_num $i &
+        ((i = i + 1))
+    done
+
+    python compile_results.py
+
+    rm -rf ../compete_results
+    
 done
 
