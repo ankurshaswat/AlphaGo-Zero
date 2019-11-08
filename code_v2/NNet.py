@@ -19,7 +19,7 @@ class NetTrainer():
 
     def __init__(self, game, args):
         self.args = args
-        self.board_size = game.getBoardSize()
+        self.board_size = game.get_board_size()
 
         if self.args.type == 1:
             self.net = NNet1(game, args)

@@ -1,8 +1,12 @@
+import math
+
 import numpy as np
+
+EPS = 1e-8
 
 
 class MCT(object):
-	def __init__(self, nnet, game, numSimulations=20):
+    def __init__(self, nnet, game, args):
         self.nnet = nnet
         self.game = game
 
@@ -14,15 +18,14 @@ class MCT(object):
         self.Es = {}        # stores game.getGameEnded ended for board s
         self.Vs = {}        # stores game.getValidMoves for board s
 
-        self.MAX_MOVES=200
+        self.MAX_MOVES = 200
 
-        self.numSimulations=numSimulations
-		# self.q_sa={}
-		# self.n_sa={}
-		# self.n_s={}
-		# self.valid_s={}
-
-
+        self.numSimulations = args.numSimulations
+        self.args = args
+        # self.q_sa={}
+        # self.n_sa={}
+        # self.n_s={}
+        # self.valid_s={}
 
     def actionProb(self, board, player, temp=1):
         """
@@ -30,15 +33,15 @@ class MCT(object):
         canonicalBoard.
 
         Returns:
-            probs: a policy vector where the probability of the ith action is
-                   proportional to Nsa[(s,a)]**(1./temp)
+                probs: a policy vector where the probability of the ith action is
+                           proportional to Nsa[(s,a)]**(1./temp)
         """
-        for i in range(self.numSimulations):
+        for _ in range(self.numSimulations):
             self.search(board, player)
 
-        s = self.game.stringRepresentation(board, player, history=False)
+        s = self.game.get_string_rep(board, player, history=False)
         counts = [self.Nsa[(s, a)] if (
-            s, a) in self.Nsa else 0 for a in range(self.game.getActionSpaceSize())]
+            s, a) in self.Nsa else 0 for a in range(self.game.get_action_space_size())]
 
         if temp == 0:
             bestA = np.argmax(counts)
@@ -68,17 +71,17 @@ class MCT(object):
         state for the current player, then its value is -v for the other player.
 
         Returns:
-            v: the negative of the value of the current canonicalBoard
+                v: the negative of the value of the current canonicalBoard
         """
 
         #---string representation of board--#
         # player independent repr, without any history
-        s = self.game.stringRepresentation(board, player, history=False)
+        s = self.game.get_string_rep(board, player, history=False)
         #-----------------------------------#
 
-        if(moveCount<=self.MAX_MOVES):
+        if(moveCount <= self.MAX_MOVES):
             if s not in self.Es:
-                self.Es[s] = self.game.getGameEnded(board, player)
+                self.Es[s] = self.game.get_game_ended(board, player)
                 # print("Winner:",self.Es[s])
 
             if self.Es[s] != 0:
@@ -86,7 +89,6 @@ class MCT(object):
                 return -self.Es[s]
         else:
             return -self.game.decide_winner(board, player)
-            
 
         if s not in self.Ps:
             # leaf node
@@ -97,7 +99,7 @@ class MCT(object):
             self.Ps[s], v = self.nnet.predict(board_repr)
             #------------------------------#
 
-            valids = self.game.getValidMoves(board, player)
+            valids = self.game.get_valid_moves(board, player)
             self.Ps[s] = self.Ps[s]*valids      # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
             if sum_Ps_s > 0:
@@ -117,10 +119,10 @@ class MCT(object):
 
         valids = self.Vs[s]
         cur_best = -float('inf')
-        best_act = 169#-1
+        best_act = 169  # -1
 
         # pick the action with the highest upper confidence bound
-        for a in range(self.game.getActionSpaceSize()):
+        for a in range(self.game.get_action_space_size()):
             if valids[a]:
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct*self.Ps[s][a] * \
@@ -135,9 +137,9 @@ class MCT(object):
 
         a = best_act
         # next_s, next_player = self.game.getNextState(board, player, a)
-        next_s = self.game.getNextState(board, player, a)
-        
-        next_player=-player
+        next_s = self.game.get_next_state(board, player, a)
+
+        next_player = -player
         # next_s = self.game.getCanonicalForm(next_s, next_player)
 
         v = self.search(next_s, -player, moveCount+1)
@@ -154,8 +156,8 @@ class MCT(object):
         self.Ns[s] += 1
         return -v
 
-	# def actionProb(self, board, player, temp=1):
-	# 	pass
+    # def actionProb(self, board, player, temp=1):
+    # 	pass
 
-	# def search(self, board, player):
-	# 	pass
+    # def search(self, board, player):
+    # 	pass

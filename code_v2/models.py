@@ -76,6 +76,7 @@ class NNet1(nn.Module):
 
         return pi_probab_dist, torch.tanh(val)
 
+
 class NNet2(nn.Module):
     """
     Neural Net module 2.
@@ -140,15 +141,15 @@ class NNet3(nn.Module):
     """
 
     def __init__(self, game, args):
-        self.board_size = game.getBoardSize()
-        self.action_size = game.getActionSpaceSize()
+        self.board_size = game.get_board_size()
+        self.action_size = game.get_action_space_size()
         self.args = args
 
         super(NNet3, self).__init__()
 
         num_init_channels = 2 if not args.history else 16
 
-        self.conv1 = nn.Sequenti0al(
+        self.conv1 = nn.Sequential(
             nn.Conv2d(num_init_channels, 128, 3, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(),
@@ -168,7 +169,7 @@ class NNet3(nn.Module):
 
         self.fc1 = nn.Sequential(
             nn.Linear(128*(self.board_size-2) * (self.board_size-2), 512),
-            nn.BatchNorm1d(1024),
+            nn.BatchNorm1d(512),
             nn.Dropout(p=self.args.dropout)
         )
 
@@ -178,13 +179,12 @@ class NNet3(nn.Module):
     def forward(self, s):
         s = s.view(-1, 2, self.board_size, self.board_size)
         s = self.conv1(s)
-        s_saved = s.copy()
+        s_saved = s.clone()
         s = self.conv2(s)
         s += s_saved
         s = self.conv3(s)
 
-        s = s.view(-1, self.args.num_channels *
-                   (self.board_size-2)*(self.board_size-2))
+        s = s.view(-1, 128 * (self.board_size-2)*(self.board_size-2))
 
         s = self.fc1(s)
 
