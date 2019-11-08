@@ -8,8 +8,9 @@ from MCT import MCT
 
 BLACK = -1
 WHITE = 1
-MAX_STEPS = 13*13
 
+MAX_STEPS_FOR_EPISODES=13*13
+MAX_STEPS_FOR_COMPETITION_GAMES=13*13
 
 def generate_episodes(nnet, game, args):  # self play
     """
@@ -63,7 +64,7 @@ def generate_episodes(nnet, game, args):  # self play
 
             reward = None
 
-            if(num_steps >= MAX_STEPS) or board.is_terminal():  # maximum steps reached
+            if(num_steps >= MAX_STEPS_FOR_EPISODES) or board.is_terminal():  # maximum steps reached
                 reward = game.decide_winner(board, player)
 
             if reward is not None:
@@ -75,3 +76,65 @@ def generate_episodes(nnet, game, args):  # self play
         train += episode
 
     return train
+
+
+def compete(old_nnet, new_nnet, args): #compete trained NN with old NN
+    num_games_per_side=args.numGamesPerSide
+
+    game=Game(13,7.5)
+
+    old=[old_nnet, 0] #stores [net,score], score is updated as games are played
+    new=[new_nnet,0]
+
+
+    for game_no in range(num_games_per_side*2): 
+        
+        if(game_no<num_games_per_side):
+            player_dict={BLACK: old, WHITE: new}
+        else:
+            player_dict={BLACK: new, WHITE: old}
+
+        black_player=MCT(player_dict[BLACK][0], game, args)
+        white_player=MCT(player_dict[WHITE][0], game, args)
+
+        mct_dict={BLACK: black_player, WHITE: white_player}
+
+        # initial board
+        board = game.get_starting_board()
+
+
+    
+        curr_player=BLACK
+        num_steps=0
+
+
+        while True:
+            num_steps+=1
+
+            # get action probabilities
+            action_prob = mct_dict[curr_player].actionProb(board, curr_player_color, 0)
+
+            # pick action and play
+            next_action = np.argmax(action_prob)
+
+            board = game.get_next_state(board, curr_player, next_action)
+
+            curr_player=-curr_player
+
+            # check if game has ended (or max moves exceeded)
+            if(num_steps >= MAX_STEPS_FOR_COMPETITION_GAMES) or board.is_terminal():  # maximum steps reached
+                break
+                
+
+        reward = game.decide_winner(board, BLACK)
+        if(reward==1):
+            player_dict[BLACK][1]+=1
+        elif(reward==-1):
+            player_dict[WHITE][1]+=1
+        else:
+            player_dict[BLACK][1]+=0.5
+            player_dict[WHITE][1]+=0.5
+
+    return old[1], new[1]
+
+        
