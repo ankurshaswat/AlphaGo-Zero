@@ -1,76 +1,103 @@
+"""
+File to manage everything in neural net.
+"""
+import random
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-CUDA = True
 
 
 class NNet(nn.Module):
+    """
+    Class managing everthing in neural net.
+    """
     def __init__(self, game, args):
-        self.board_x, self.board_y = game.getBoardSize()
+        self.board_size, _ = game.getBoardSize()
         self.action_size = game.getActionSpaceSize()
         self.args = args
 
         super(NNet, self).__init__()
-        self.conv1 = nn.Conv2d(2, args.num_channels, 3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(
-            args.num_channels, args.num_channels, 3, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(
-            args.num_channels, args.num_channels, 3, stride=1)
-        self.conv4 = nn.Conv2d(
-            args.num_channels, args.num_channels, 3, stride=1)
 
-        self.bn1 = nn.BatchNorm2d(args.num_channels)
-        self.bn2 = nn.BatchNorm2d(args.num_channels)
-        self.bn3 = nn.BatchNorm2d(args.num_channels)
-        self.bn4 = nn.BatchNorm2d(args.num_channels)
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(2 * args.history, args.num_channels, 3, padding=1),
+            nn.BatchNorm2d(args.num_channels),
+            nn.ReLU(),
+        )
 
-        self.fc1 = nn.Linear(
-            args.num_channels*(self.board_x-4)*(self.board_y-4), 1024)
-        self.fc_bn1 = nn.BatchNorm1d(1024)
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(args.num_channels, args.num_channels, 3, padding=1),
+            nn.BatchNorm2d(args.num_channels),
+            nn.ReLU(),
+        )
 
-        self.fc2 = nn.Linear(1024, 512)
-        self.fc_bn2 = nn.BatchNorm1d(512)
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(args.num_channels, args.num_channels, 3),
+            nn.BatchNorm2d(args.num_channels),
+            nn.ReLU(),
+        )
+
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(args.num_channels, args.num_channels, 3),
+            nn.BatchNorm2d(args.num_channels),
+            nn.ReLU(),
+        )
+
+        self.fc1 = nn.Sequential(
+            nn.Linear(args.num_channels*(self.board_size-4)
+                      * (self.board_size-4), 1024),
+            nn.BatchNorm1d(1024),
+            nn.Dropout(p=self.args.dropout)
+        )
+
+        self.fc2 = nn.Sequential(
+            nn.Linear(1024, 512),
+            nn.BatchNorm1d(512),
+            nn.Dropout(p=self.args.dropout)
+        )
 
         self.fc3 = nn.Linear(512, self.action_size)
-
         self.fc4 = nn.Linear(512, 1)
 
     def forward(self, s):
-        #                                                           s: batch_size x board_x x board_y
-        # batch_size x 1 x board_x x board_y
-        s = s.view(-1, 2, self.board_x, self.board_y)
-        # batch_size x num_channels x board_x x board_y
-        s = F.relu(self.bn1(self.conv1(s)))
-        # batch_size x num_channels x board_x x board_y
-        s = F.relu(self.bn2(self.conv2(s)))
-        # batch_size x num_channels x (board_x-2) x (board_y-2)
-        s = F.relu(self.bn3(self.conv3(s)))
-        # batch_size x num_channels x (board_x-4) x (board_y-4)
-        s = F.relu(self.bn4(self.conv4(s)))
+        s = s.view(-1, 2, self.board_size, self.board_size)
+        s = self.conv1(s)
+        s = self.conv2(s)
+        s = self.conv3(s)
+        s = self.conv4(s)
+
         s = s.view(-1, self.args.num_channels *
-                   (self.board_x-4)*(self.board_y-4))
+                   (self.board_size-4)*(self.board_size-4))
 
-        s = F.dropout(F.relu(self.fc_bn1(self.fc1(s))), p=self.args.dropout,
-                      training=self.training)  # batch_size x 1024
-        s = F.dropout(F.relu(self.fc_bn2(self.fc2(s))), p=self.args.dropout,
-                      training=self.training)  # batch_size x 512
+        s = self.fc1(s)
+        s = self.fc2(s)
 
-        # batch_size x action_size
         pi = self.fc3(s)
-        # batch_size x 1
         v = self.fc4(s)
 
         return F.log_softmax(pi, dim=1), torch.tanh(v)
 
     def start_training(self, examples, args):
-        optimizer = optim.Adam(lr= ????, momentum= ???)
+        optimizer = optim.Adam(self.parameters(), lr=0.001, momentum=0.9,weight_decay=args.l2_regularization)
 
+        mse_loss = nn.MSELoss()
+        crossEntr_loss = nn.CrossEntropyLoss()
+        
         for epoch in range(args.epochs):
             self.train()
 
-            while batch_idx < int(len(examples)/args.batch_size):
-                selected_examples = np.random.randint()
+            all_ids = list(range(len(examples)))
+            random.shuffle(all_ids)
+
+            i = 0
+            batch_num = 0
+            running_loss_v = 0
+            running_loss_pi = 0
+
+            while(i<len(examples)):
+                selected_examples = all_ids[i:i+args.batch_size]
+
                 example_batch, pi, v = list(
                     zip(*[examples[i] for i in selected_examples]))
                 boards = torch.FloatTensor(np.array(boards).astype(np.float64))
@@ -78,15 +105,20 @@ class NNet(nn.Module):
                 target_v = torch.FloatTensor(np.array(vs).astype(np.float64))
 
                 predicted_pi, predicted_v = self(example_batch)
-                loss_pi = -torch.sum(target_pi*predicted_pi) / \
-                    target_pi.size()[0]
-                loss_v = torch.sum((target_v-predicted_v.view(-1))
-                                   ** 2)/target_v.size()[0]
+
+                loss_pi = crossEntr_loss(predicted_pi,target_pi)
+                loss_v = mse_loss(predicted_v,target_v)
+
+                running_loss_pi += loss_pi.item()
+                running_loss_v += loss_v.item
+                total_loss = loss_pi + loss_v
 
                 optimizer.zero_grad()
                 total_loss.backward()
                 optimizer.step()
-                batch_idx += 1
+                
+                batch_num += 1
+                i += args.batch_size
 
     def save_checkpoint(self, path):
         torch.save({'state_dict': self.state_dict()}, path)
@@ -98,7 +130,7 @@ class NNet(nn.Module):
 
     def predict(self, numpy_board):
         board = torch.FloatTensor(numpy_board)
-        if CUDA:
+        if self.args.cuda:
             board = board.contiguous().cuda()
 
         board = board.view(2, self.board_size, self.board_size)
