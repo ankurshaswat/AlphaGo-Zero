@@ -7,6 +7,7 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 
 from models import NNet1, NNet2, NNet3
@@ -38,7 +39,6 @@ class NetTrainer():
                                   momentum=self.args.momentum, weight_decay=self.args.l2_regularization)
 
         mse_loss = nn.MSELoss()
-        entr_loss = nn.CrossEntropyLoss()
 
         for epoch in range(self.args.epochs):
             self.net.train()
@@ -54,19 +54,32 @@ class NetTrainer():
             while i < len(examples):
                 selected_examples = all_ids[i:i+self.args.batch_size]
 
-                example_batch, pis, vals = list(
+                example_batch, pis, valids, vals = list(
                     zip(*[examples[i] for i in selected_examples]))
-                boards = torch.FloatTensor(np.array(boards).astype(np.float64))
-                target_pi = torch.FloatTensor(np.array(pis))
-                target_v = torch.FloatTensor(np.array(vals).astype(np.float64))
+                boards = torch.FloatTensor(
+                    np.array(example_batch).astype(np.float64))
 
-                predicted_pi, predicted_v = self.net(example_batch)
+                np_valids = np.asarray(valids)
+                np_pis = np.asarray(pis)
+                target_pi = torch.FloatTensor(
+                    np_pis*np_valids + (1-np_valids) * (-10000))
+                target_v = torch.FloatTensor(
+                    np.array(vals).astype(np.float64)).reshape(-1, 1)
 
-                loss_pi = entr_loss(predicted_pi, target_pi)
+                predicted_pi, predicted_v = self.net(boards)
+
+                # print(predicted_pi[0],target_pi[0])
+                target_pi_normalized = F.log_softmax(target_pi, dim=1)
+                predicted_pi_normalized = F.softmax(predicted_pi, dim=1)
+
+                loss_pi = -torch.sum(target_pi_normalized*predicted_pi_normalized) / \
+                    target_pi.size()[0]
+                # print(predicted_v.shape,target_v.shape)
                 loss_v = mse_loss(predicted_v, target_v)
 
                 running_loss_pi += loss_pi.item()
-                running_loss_v += loss_v.item
+                running_loss_v += loss_v.item()
+
                 total_loss = loss_pi + loss_v
 
                 optimizer.zero_grad()

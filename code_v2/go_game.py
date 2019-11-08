@@ -45,7 +45,7 @@ class GoGame:
         """
         # print(player, action)
         new_board = board.execute_move(action, player)
-        new_board.print_board()
+        # new_board.print_board()
         # xx = input()
         return new_board
 
