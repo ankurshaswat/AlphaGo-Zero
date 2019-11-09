@@ -1,5 +1,7 @@
 #!/bin/bash
 
+NUM_THREADS=1
+
 kill_child_processes() {
     isTopmost=$1
     curPid=$2
@@ -22,7 +24,6 @@ trap "kill_child_processes 1 $$; exit 0" INT
 for i in {0..1}
 do
 
-    NUM_THREADS=10
     unique_token="$(date +"%T")"
 
     echo "Spawning new threads with unique token $unique_token"
@@ -48,6 +49,8 @@ do
         ((i = i + 1))
     done
 
+    wait
+    
     python compile_results.py
 
     rm -rf ../compete_results

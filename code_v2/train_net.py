@@ -21,7 +21,7 @@ if __name__ == "__main__":
     GAME = GoGame(13, 7.5)
 
     NEW_NET = NetTrainer(GAME, ARGS)
-    NEW_NET.load_checkpoint(ARGS.new_model_path+str(ARGS.type))
+    NEW_NET.load_checkpoint(ARGS.best_model_path+str(ARGS.type))
 
     ALL_EXAMPLES = []
 

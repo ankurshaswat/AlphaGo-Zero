@@ -10,7 +10,7 @@ if __name__ == "__main__":
     GAME = GoGame(13, 7.5)
 
     OLD_NET = NetTrainer(GAME, ARGS)
-    OLD_NET.load_checkpoint(ARGS.new_model_path+str(ARGS.type))
+    OLD_NET.load_checkpoint(ARGS.best_model_path+str(ARGS.type))
 
     NEW_NET = NetTrainer(GAME, ARGS)
     NEW_NET.load_checkpoint(ARGS.temp_model_path+str(ARGS.type))

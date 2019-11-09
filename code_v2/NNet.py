@@ -61,18 +61,17 @@ class NetTrainer():
 
                 np_valids = np.asarray(valids)
                 np_pis = np.asarray(pis)
+
                 target_pi = torch.FloatTensor(
-                    np_pis*np_valids + (1-np_valids) * (-10000))
+                    np_pis*np_valids + (1-np_valids) * (-1000))
                 target_v = torch.FloatTensor(
                     np.array(vals).astype(np.float64)).reshape(-1, 1)
 
-                predicted_pi, predicted_v = self.net(boards)
+                predicted_pi_log_softmax, predicted_v = self.net(boards)
 
-                # print(predicted_pi[0],target_pi[0])
-                target_pi_normalized = F.log_softmax(target_pi, dim=1)
-                predicted_pi_normalized = F.softmax(predicted_pi, dim=1)
+                target_pi_softmax = F.softmax(target_pi, dim=1)
 
-                loss_pi = -torch.sum(target_pi_normalized*predicted_pi_normalized) / \
+                loss_pi = -torch.sum(target_pi_softmax*predicted_pi_log_softmax) / \
                     target_pi.size()[0]
                 # print(predicted_v.shape,target_v.shape)
                 loss_v = mse_loss(predicted_v, target_v)
@@ -119,4 +118,8 @@ class NetTrainer():
         with torch.no_grad():
             pis, vals = self.net(board)
 
-        return pis.data.cpu().numpy()[0], vals.data.cpu().numpy()[0]
+        probab_dist = torch.exp(pis)
+
+        # print(probab_dist)
+
+        return torch.exp(pis).data.cpu().numpy()[0], vals.data.cpu().numpy()[0]

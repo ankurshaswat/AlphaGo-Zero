@@ -48,7 +48,7 @@ def parse_args():
     parser.add_argument('-best_model_path', action='store',
                         dest='best_model_path', default='../models/best_model.pytorch')
     parser.add_argument('-temp_model_path', action='store',
-                        dest='best_model_path', default='../models/best_model.pytorch')
+                        dest='temp_model_path', default='../models/temp_model.pytorch')
 
     args = parser.parse_args()
 
