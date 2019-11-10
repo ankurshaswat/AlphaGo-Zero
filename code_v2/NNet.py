@@ -29,7 +29,7 @@ class NetTrainer():
         elif self.args.type == 3:
             self.net = NNet3(game, args)
         else:
-            print('Specify neural net type correctly.')
+            print('Specify neural net type correctly.', flush=True)
 
     def train(self, examples):
         """
@@ -73,7 +73,7 @@ class NetTrainer():
 
                 loss_pi = -torch.sum(target_pi_softmax*predicted_pi_log_softmax) / \
                     target_pi.size()[0]
-                # print(predicted_v.shape,target_v.shape)
+                # print(predicted_v.shape,target_v.shape, flush=True)
                 loss_v = mse_loss(predicted_v, target_v)
 
                 running_loss_pi += loss_pi.item()
@@ -89,7 +89,7 @@ class NetTrainer():
                 i += self.args.batch_size
 
             print('Epoch {}: Loss_pi {} Loss_v {}'.format(
-                epoch, running_loss_pi/batch_num, running_loss_v/batch_num))
+                epoch, running_loss_pi/batch_num, running_loss_v/batch_num), flush=True)
 
     def save_checkpoint(self, path):
         """
@@ -120,6 +120,6 @@ class NetTrainer():
 
         probab_dist = torch.exp(pis)
 
-        # print(probab_dist)
+        # print(probab_dist, flush=True)
 
         return torch.exp(pis).data.cpu().numpy()[0], vals.data.cpu().numpy()[0]

@@ -33,4 +33,4 @@ if __name__ == "__main__":
     with open(NEW_EXAMPLE_PATH + UNIQUE_TOKEN+'_'+str(THREAD_NUM)+'_net'+'.pkl', 'wb') as handle:
         pickle.dump({'examples': EPIS}, handle)
 
-    print('Thread Number {} ended and saved file.'.format(THREAD_NUM))
+    print('Thread Number {} ended and saved file.'.format(THREAD_NUM), flush=True)

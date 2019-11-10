@@ -21,6 +21,6 @@ if __name__ == "__main__":
         os.makedirs('../compete_results')
 
     print('ThreadNUm {} OldWins {} NewWins {}'.format(
-        ARGS.thread_num, OLD_WIN_COUNT, NEW_WIN_COUNT))
-    with open('../compete_results/' + ARGS.thread_num + '.txt', 'w') as file:
+        ARGS.thread_num, OLD_WIN_COUNT, NEW_WIN_COUNT), flush=True)
+    with open('../compete_results/' + str(ARGS.thread_num) + '.txt', 'w') as file:
         file.write(str(OLD_WIN_COUNT) + ' ' + str(NEW_WIN_COUNT))

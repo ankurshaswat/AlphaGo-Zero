@@ -70,7 +70,7 @@ class GoBoard():
         Execute a move on pachi py board and return the obtained
         board(assuming copy has been created)
         """
-        # print(player,self.curr_player)
+        # print(player,self.curr_player, flush=True)
         assert not self.done
         assert player == self.curr_player
         assert 0 <= action <= self.board_size**2 + 2
@@ -83,11 +83,11 @@ class GoBoard():
         if action == self.pass_action:
             last_passed = True
             done = self.last_passed
-            print('2 Passes Done')
+            print('2 Passes Done', flush=True)
             new_board = self.board.play(pachi_py.PASS_COORD, curr_player)
         elif action == self.resign_action:
             done = True
-            print('Someone Resigned')
+            print('Someone Resigned', flush=True)
             new_board = self.board.play(pachi_py.RESIGN_COORD, curr_player)
         else:
             a_x, a_y = action // self.board_size, action % self.board_size
@@ -95,7 +95,7 @@ class GoBoard():
                 self.board.ij_to_coord(a_x, a_y), curr_player)
 
         new_history = [self.board] + self.history[:6]
-        # print(len(new_history))
+        # print(len(new_history), flush=True)
         return GoBoard(self.board_size, new_board, -1*player, done, last_passed, new_history)
 
     def get_legal_moves(self, player):
@@ -153,7 +153,7 @@ class GoBoard():
         """
         color_to_play = 'Black' if self.curr_player == -1 else 'White'
         print('To play: {}\n{}'.format(
-            color_to_play, self.board.__repr__().decode()))
+            color_to_play, self.board.__repr__().decode()), flush=True)
 
     def is_terminal(self):
         """

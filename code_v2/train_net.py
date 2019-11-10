@@ -31,7 +31,7 @@ if __name__ == "__main__":
             ALL_EXAMPLES += b['examples']
 
     if len(ALL_EXAMPLES) == 0:
-        print('No Example file found')
+        print('No Example file found', flush=True)
         sys.exit()
 
     NEW_NET.train(ALL_EXAMPLES)
