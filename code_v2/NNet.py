@@ -31,6 +31,9 @@ class NetTrainer():
         else:
             print('Specify neural net type correctly.')
 
+        if(args.cuda):
+            self.net=self.net.cuda()
+
     def train(self, examples):
         """
         Train neural net
@@ -65,6 +68,9 @@ class NetTrainer():
                     np_pis*np_valids + (1-np_valids) * (-10000))
                 target_v = torch.FloatTensor(
                     np.array(vals).astype(np.float64)).reshape(-1, 1)
+
+                if(self.args.cuda):
+                    boards, target_pi, target_v= boards.contiguous().cuda(), target_pi.contiguous().cuda(), target_v.contiguous().cuda()
 
                 predicted_pi, predicted_v = self.net(boards)
 

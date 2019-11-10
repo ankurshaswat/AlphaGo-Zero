@@ -1,5 +1,8 @@
 #!/bin/bash
 
+NUM_THREADS=10
+
+
 kill_child_processes() {
     isTopmost=$1
     curPid=$2
@@ -17,12 +20,12 @@ kill_child_processes() {
 trap "kill_child_processes 1 $$; exit 0" INT
 
 
-# python createNewNet.py
+# python create_new_net.py
+
 
 for i in {0..1}
 do
 
-    NUM_THREADS=10
     unique_token="$(date +"%T")"
 
     echo "Spawning new threads with unique token $unique_token"

@@ -9,8 +9,8 @@ from MCT import MCT
 BLACK = -1
 WHITE = 1
 
-MAX_STEPS_FOR_EPISODES = 13*13
-MAX_STEPS_FOR_COMPETITION_GAMES = 13*13
+MAX_STEPS_FOR_EPISODES = 250#13*13
+MAX_STEPS_FOR_COMPETITION_GAMES = 250#13*13
 
 
 def generate_episodes(nnet, game, args):  # self play
@@ -34,7 +34,7 @@ def generate_episodes(nnet, game, args):  # self play
     player = BLACK  # game always starts with BLACK
 
     temp = 1
-    for _ in range(num_epis):
+    for epi in range(num_epis):
         episode = []
         while True:
             num_steps += 1
@@ -61,6 +61,8 @@ def generate_episodes(nnet, game, args):  # self play
 
             board = game.get_next_state(board, player, next_action)
 
+            # board.print_board()
+
             # update player
             player = -player
 
@@ -70,11 +72,12 @@ def generate_episodes(nnet, game, args):  # self play
                 reward = game.decide_winner(board, player)
 
             if reward is not None:
-                for i in reversed(range(len(train))):
+                for i in reversed(range(len(episode))):
                     reward = -1 * reward  # flip reward, as player alternates
                     episode[i][-1] = reward
                 break
 
+        print("Episode {}/{} completed".format(epi, num_epis))
         train += episode
 
     return train
@@ -134,5 +137,7 @@ def compete(old_nnet, new_nnet, game, args):
         else:
             player_dict[BLACK][1] += 0.5
             player_dict[WHITE][1] += 0.5
+
+        print("Old score:{}, New score:{}".format(old[1],new[1]))
 
     return old[1], new[1]
