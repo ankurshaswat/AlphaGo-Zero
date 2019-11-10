@@ -17,4 +17,4 @@ if __name__ == "__main__":
         os.makedirs('../models')
 
     NET = NetTrainer(GAME, ARGS)
-    NET.save_checkpoint(ARGS.new_model_path+str(ARGS.type))
+    NET.save_checkpoint(ARGS.best_model_path+str(ARGS.type))

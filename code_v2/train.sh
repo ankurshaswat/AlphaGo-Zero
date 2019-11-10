@@ -1,59 +1,70 @@
 #!/bin/bash
 
-NUM_THREADS=10
+CUDA_DEVICES=(0 1 3 4 5)
+NUM_THREADS=2
+NUM_CYCLES=2
 
+NUM_GPU=${#CUDA_DEVICES[@]}
+echo "Num gpus available = $NUM_GPU"
 
 kill_child_processes() {
     isTopmost=$1
     curPid=$2
-    childPids=`ps -o pid --no-headers --ppid ${curPid}`
-    for childPid in $childPids
-    do
+    childPids=$(ps -o pid --no-headers --ppid ${curPid})
+    for childPid in $childPids; do
         kill_child_processes 0 $childPid
     done
     if [ $isTopmost -eq 0 ]; then
-        kill -9 $curPid 2> /dev/null
+        kill -9 $curPid 2>/dev/null
     fi
 }
 
 # Ctrl-C trap. Catches INT signal
 trap "kill_child_processes 1 $$; exit 0" INT
 
+mkdir ../logs
 
 # python create_new_net.py
 
 
-for i in {0..1}
-do
+CYCLE_NUM=0
+while [[ $CYCLE_NUM -lt $NUM_CYCLES ]]; do
 
     unique_token="$(date +"%T")"
 
-    echo "Spawning new threads with unique token $unique_token"
+    echo "Spawning threads for self play."
 
-    i=1
-    while [[ $i -le $NUM_THREADS ]]
-    do
-        python game_generator.py -thread_num $i -unique_token $unique_token &
-        ((i = i + 1))
+    THREAD_NUM=0
+    CUDA_DEVICE=0
+    while [[ $THREAD_NUM -lt $NUM_THREADS ]]; do
+        # echo CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[$CUDA_DEVICE]} CUDA_DEVICE_VAR=$CUDA_DEVICE THREAD_NUM=$THREAD_NUM UNIQUE_TOKEN=$unique_token CYCLE_NUM=$CYCLE_NUM
+        CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python game_generator.py -thread_num $THREAD_NUM -unique_token $unique_token >../logs/${unique_token}_a_${CYCLE_NUM}_${THREAD_NUM}_generator.log &
+        ((THREAD_NUM = THREAD_NUM + 1))
+        ((CUDA_DEVICE = (CUDA_DEVICE + 1) % NUM_GPU))
     done
 
-    ## Wait for games to finish
-    
     wait
-    echo "All threads of this batch complete."
 
-    python train_net.py
+    echo "Starting Training."
+    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python train_net.py >../logs/${unique_token}_b_${CYCLE_NUM}_train.log
 
-    i=1
-    while [[ $i -le $NUM_THREADS ]]
-    do
-        python compete_with_best.py -thread_num $i &
-        ((i = i + 1))
+    echo "Spawning threads for competing."
+
+    THREAD_NUM=0
+    CUDA_DEVICE=0
+    while [[ $THREAD_NUM -lt $NUM_THREADS ]]; do
+        # echo CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[$CUDA_DEVICE]} CUDA_DEVICE_VAR=$CUDA_DEVICE THREAD_NUM=$THREAD_NUM UNIQUE_TOKEN=$unique_token CYCLE_NUM=$CYCLE_NUM
+        CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python compete_with_best.py -thread_num $THREAD_NUM >../logs/${unique_token}_c_${CYCLE_NUM}_${THREAD_NUM}_compete.log &
+        ((THREAD_NUM = THREAD_NUM + 1))
+        ((CUDA_DEVICE = (CUDA_DEVICE + 1) % NUM_GPU))
     done
 
-    python compile_results.py
+    wait
+
+    echo "Starting result compilation."
+    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python compile_results.py >../logs/${unique_token}_d_${CYCLE_NUM}_compileResults.log
 
     rm -rf ../compete_results
-    
-done
 
+    ((CYCLE_NUM = CYCLE_NUM + 1))
+done

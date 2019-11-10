@@ -29,7 +29,7 @@ class NetTrainer():
         elif self.args.type == 3:
             self.net = NNet3(game, args)
         else:
-            print('Specify neural net type correctly.')
+            print('Specify neural net type correctly.', flush=True)
 
         if(args.cuda):
             self.net=self.net.cuda()
@@ -64,23 +64,22 @@ class NetTrainer():
 
                 np_valids = np.asarray(valids)
                 np_pis = np.asarray(pis)
+
                 target_pi = torch.FloatTensor(
-                    np_pis*np_valids + (1-np_valids) * (-10000))
+                    np_pis*np_valids + (1-np_valids) * (-1000))
                 target_v = torch.FloatTensor(
                     np.array(vals).astype(np.float64)).reshape(-1, 1)
 
                 if(self.args.cuda):
                     boards, target_pi, target_v= boards.contiguous().cuda(), target_pi.contiguous().cuda(), target_v.contiguous().cuda()
 
-                predicted_pi, predicted_v = self.net(boards)
+                predicted_pi_log_softmax, predicted_v = self.net(boards)
 
-                # print(predicted_pi[0],target_pi[0])
-                target_pi_normalized = F.log_softmax(target_pi, dim=1)
-                predicted_pi_normalized = F.softmax(predicted_pi, dim=1)
+                target_pi_softmax = F.softmax(target_pi, dim=1)
 
-                loss_pi = -torch.sum(target_pi_normalized*predicted_pi_normalized) / \
+                loss_pi = -torch.sum(target_pi_softmax*predicted_pi_log_softmax) / \
                     target_pi.size()[0]
-                # print(predicted_v.shape,target_v.shape)
+                # print(predicted_v.shape,target_v.shape, flush=True)
                 loss_v = mse_loss(predicted_v, target_v)
 
                 running_loss_pi += loss_pi.item()
@@ -96,7 +95,7 @@ class NetTrainer():
                 i += self.args.batch_size
 
             print('Epoch {}: Loss_pi {} Loss_v {}'.format(
-                epoch, running_loss_pi/batch_num, running_loss_v/batch_num))
+                epoch, running_loss_pi/batch_num, running_loss_v/batch_num), flush=True)
 
     def save_checkpoint(self, path):
         """
@@ -125,4 +124,8 @@ class NetTrainer():
         with torch.no_grad():
             pis, vals = self.net(board)
 
-        return pis.data.cpu().numpy()[0], vals.data.cpu().numpy()[0]
+        probab_dist = torch.exp(pis)
+
+        # print(probab_dist, flush=True)
+
+        return torch.exp(pis).data.cpu().numpy()[0], vals.data.cpu().numpy()[0]

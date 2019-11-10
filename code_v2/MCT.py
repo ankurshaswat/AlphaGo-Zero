@@ -50,7 +50,7 @@ class MCT(object):
             return probs
 
         counts = [x**(1./temp) for x in counts]
-        # print(counts)
+        # print(counts, flush=True)
         probs = [x/float(sum(counts)) for x in counts]
         return probs
 
@@ -82,7 +82,7 @@ class MCT(object):
         if(moveCount <= self.MAX_MOVES):
             if s not in self.Es:
                 self.Es[s] = self.game.get_game_ended(board, player)
-                # print("Winner:",self.Es[s])
+                # print("Winner:",self.Es[s], flush=True)
 
             if self.Es[s] != 0:
                 # terminal node
@@ -109,7 +109,7 @@ class MCT(object):
 
                 # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
                 # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.
-                # print("All valid moves were masked, do workaround.")
+                # TODO : print("All valid moves were masked, do workaround.", flush=True)
                 self.Ps[s] = self.Ps[s] + valids
                 self.Ps[s] /= np.sum(self.Ps[s])
 

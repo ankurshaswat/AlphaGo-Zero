@@ -18,6 +18,9 @@ if __name__ == "__main__":
             OLD_WIN_COUNT += int(scores[0])
             NEW_WIN_COUNT += int(scores[1])
 
+    print('TotalOldWins {} TotalNewWins {}'.format(
+        OLD_WIN_COUNT, NEW_WIN_COUNT), flush=True)
+
     if NEW_WIN_COUNT > OLD_WIN_COUNT:
         os.rename(ARGS.temp_model_path+str(ARGS.type),
                   ARGS.best_model_path+str(ARGS.type))

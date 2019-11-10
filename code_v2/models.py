@@ -3,6 +3,7 @@ All models to test.
 """
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class NNet1(nn.Module):
@@ -74,7 +75,7 @@ class NNet1(nn.Module):
         pi_probab_dist = self.fc3(s)
         val = self.fc4(s)
 
-        return pi_probab_dist, torch.tanh(val)
+        return F.log_softmax(pi_probab_dist), torch.tanh(val)
 
 
 class NNet2(nn.Module):
@@ -132,7 +133,7 @@ class NNet2(nn.Module):
         pi_probab_dist = self.fc2(s)
         val = self.fc3(s)
 
-        return pi_probab_dist, torch.tanh(val)
+        return F.log_softmax(pi_probab_dist), torch.tanh(val)
 
 
 class NNet3(nn.Module):
@@ -191,4 +192,4 @@ class NNet3(nn.Module):
         pi_probab_dist = self.fc2(s)
         val = self.fc3(s)
 
-        return pi_probab_dist, torch.tanh(val)
+        return F.log_softmax(pi_probab_dist, dim=1), torch.tanh(val)
