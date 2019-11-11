@@ -22,7 +22,7 @@ def parse_args():
     parser.add_argument('-unique_token', action='store',
                         dest="unique_token", default='notSpecified')
     parser.add_argument('-numEpisodes', action='store',
-                        dest='numEpisodes', type=int, default=10)#10
+                        dest='numEpisodes', type=int, default=1)#10
     parser.add_argument('-numSimulations', action='store',
                         dest='numSimulations', type=int, default=2)#100
     parser.add_argument('-cpuct', action='store',

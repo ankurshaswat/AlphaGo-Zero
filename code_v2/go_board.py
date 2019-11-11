@@ -87,11 +87,11 @@ class GoBoard():
             last_passed = True
             if self.last_passed:
                 done = True
-                print('2 Passes Done', flush=True)
+                # print('2 Passes Done', flush=True)
             new_board = self.board.play(pachi_py.PASS_COORD, curr_player)
         elif action == self.resign_action:
             done = True
-            print('Someone Resigned', flush=True)
+            # print('Someone Resigned', flush=True)
             new_board = self.board.play(pachi_py.RESIGN_COORD, curr_player)
         else:
             a_x, a_y = action // self.board_size, action % self.board_size

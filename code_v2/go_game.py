@@ -131,7 +131,9 @@ class GoGame:
         """
         Convert an already generated numpy_representation to string.
         """
-        return "".join(str(x) for x in np_arr.ravel())
+        correctly_ordered_np_arr = np_arr.transpose(2, 0, 1)
+        # print(correctly_ordered_np_arr.shape)
+        return "".join(str(x) for x in correctly_ordered_np_arr.ravel())
 
     def get_score(self, board, player):
         """

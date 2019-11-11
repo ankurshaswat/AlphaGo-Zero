@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+import pachi_py
 
 EPS = 1e-8
 
@@ -26,7 +27,7 @@ class MCT(object):
         self.Ns = {}        # stores #times board s was visited
         self.Ps = {}        # stores initial policy (returned by neural net)
 
-        self.Es = {}        # stores game.getGameEnded ended for board s
+        # self.Es = {}        # stores game.getGameEnded ended for board s
         self.Vs = {}        # stores game.getValidMoves for board s
 
         self.MAX_MOVES = 250
@@ -48,7 +49,11 @@ class MCT(object):
                            proportional to Nsa[(s,a)]**(1./temp)
         """
         for _ in range(self.numSimulations):
+            # try:
             self.search(board, player)
+            # except pachi_py.IllegalMove:
+            # print('Illegal action taken. Continuing.')
+            # continue
 
         s = self.game.get_string_rep(board, player, history=False)
         counts = [self.Nsa[(s, a)] if (
@@ -66,6 +71,7 @@ class MCT(object):
 
         probs = add_noise(probs)
 
+        # valids = self.game.get_valid_moves(board, player)
         valids = self.Vs[s]
         probs = probs*valids
 
@@ -115,12 +121,13 @@ class MCT(object):
         #-----------------------------------#
 
         # if s not in self.Es:
-        self.Es[s] = self.game.get_game_ended(board, player)
+        # self.Es[s] = self.game.get_game_ended(board, player)
+        game_end_result = self.game.get_game_ended(board, player)
         # print("Winner:",self.Es[s], flush=True)
 
-        if self.Es[s] != 0:
+        if game_end_result != 0:
             # terminal node
-            return -self.Es[s]
+            return -game_end_result
 
         if s not in self.Ps:
             # leaf node
@@ -152,6 +159,7 @@ class MCT(object):
             return -v
 
         valids = self.Vs[s]
+        # valids = self.game.get_valid_moves(board, player)
         cur_best = -float('inf')
         best_act = self.game.get_action_space_size()-1  # -1
 
