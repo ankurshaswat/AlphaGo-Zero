@@ -62,9 +62,9 @@ def generate_episodes(nnet, game, args):  # self play
             next_action = np.random.choice(len(action_prob), p=action_prob)
 
             board = game.get_next_state(board, player, next_action)
-            # print(next_action)
-            # board.print_board()
-
+            #print(next_action)
+            #board.print_board()
+            #print(player,next_action,flush=True)
             # update player
             player = -player
 
@@ -81,7 +81,7 @@ def generate_episodes(nnet, game, args):  # self play
 
         #print("Episode {}/{} completed".format(epi, num_epis), flush=True)
         print("Episode {}/{} completed in time {:.2f}s".format(epi +
-                                                               1, num_epis, time.time()-start_time))
+                                                               1, num_epis, time.time()-start_time),flush=True)
         train += episode
 
     return train
@@ -127,10 +127,10 @@ def compete(old_nnet, new_nnet, game, args):
                 board, curr_player, 0)
 
             # pick action and play
-            next_action = np.argmax(action_prob)
-
+            #next_action = np.argmax(action_prob)
+            next_action = np.random.choice(len(action_prob),p=action_prob)
             board = game.get_next_state(board, curr_player, next_action)
-
+            #print(curr_player,next_action,flush=True)
             curr_player = -curr_player
 
             # check if game has ended (or max moves exceeded)

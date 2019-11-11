@@ -1,8 +1,8 @@
 #!/bin/bash
 
-CUDA_DEVICES=(0 1 3 4 5)
-NUM_THREADS=2
-NUM_CYCLES=2
+CUDA_DEVICES=(0 1 2 3)
+NUM_THREADS=28
+NUM_CYCLES=5
 
 NUM_GPU=${#CUDA_DEVICES[@]}
 echo "Num gpus available = $NUM_GPU"
@@ -64,7 +64,7 @@ while [[ $CYCLE_NUM -lt $NUM_CYCLES ]]; do
     echo "Starting result compilation."
     CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python compile_results.py >> ../logs/${unique_token}.log
 
-    rm -rf ../compete_results
+    #rm -rf ../compete_results
 
     ((CYCLE_NUM = CYCLE_NUM + 1))
 done

@@ -28,7 +28,7 @@ class MCT(object):
         self.Ps = {}        # stores initial policy (returned by neural net)
 
         # self.Es = {}        # stores game.getGameEnded ended for board s
-        # self.Vs = {}        # stores game.getValidMoves for board s
+        #self.Vs = {}        # stores game.getValidMoves for board s
 
         self.MAX_MOVES = 250
 
@@ -72,7 +72,7 @@ class MCT(object):
         probs = add_noise(probs)
 
         valids = self.game.get_valid_moves(board, player)
-        # valids = self.Vs[s]
+        #valids = self.Vs[s]
         probs = probs*valids
 
         probs /= np.sum(probs)
@@ -154,11 +154,11 @@ class MCT(object):
                 self.Ps[s] = self.Ps[s] + valids
                 self.Ps[s] /= np.sum(self.Ps[s])
 
-            # self.Vs[s] = valids
+            #self.Vs[s] = valids
             self.Ns[s] = 0
             return -v
 
-        # valids = self.Vs[s]
+        #valids = self.Vs[s]
         valids = self.game.get_valid_moves(board, player)
         cur_best = -float('inf')
         best_act = self.game.get_action_space_size()-1  # -1
