@@ -10,8 +10,8 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description='Generate New Games.')
 
-    # parser.add_argument('-cuda', action='store_true', default=False)
-    parser.add_argument('-cuda', action='store_true', default=True)
+    parser.add_argument('-cuda', action='store_true', default=False)
+    # parser.add_argument('-cuda', action='store_true', default=True)
 
     parser.add_argument('-new_path', action='store',
                         dest="new_path", default='../new_examples/')
@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('-numEpisodes', action='store',
                         dest='numEpisodes', type=int, default=1)#10
     parser.add_argument('-numSimulations', action='store',
-                        dest='numSimulations', type=int, default=100)#100
+                        dest='numSimulations', type=int, default=2)#100
     parser.add_argument('-cpuct', action='store',
                         dest='cpuct', type=float, default=1.0)
     parser.add_argument('-numStepsForTempChange', action='store',
@@ -42,11 +42,11 @@ def parse_args():
     parser.add_argument('-l2_regularization', action='store',
                         dest='l2_regularization', type=float, default=1e-5)
     parser.add_argument('-epochs', action='store',
-                        dest='epochs', type=int, default=1)#10
+                        dest='epochs', type=int, default=10)#10
     parser.add_argument('-batch_size', action='store',
-                        dest='batch_size', type=int, default=64)
+                        dest='batch_size', type=int, default=16)
     parser.add_argument('-numGamesPerSide', action='store',
-                        dest='numGamesPerSide', type=int, default=20)#10
+                        dest='numGamesPerSide', type=int, default=2)#10
     parser.add_argument('-best_model_path', action='store',
                         dest='best_model_path', default='../models/best_model.pytorch')
     parser.add_argument('-temp_model_path', action='store',

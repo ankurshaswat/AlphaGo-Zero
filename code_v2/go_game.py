@@ -37,16 +37,14 @@ class GoGame:
         Get number of possible actions
         """
 
-        return self.board_size ** 2 + 2
+        return self.board_size ** 2 + 1
 
     def get_next_state(self, board, player, action):
         """
         Take action and get new board
         """
-        # print(player, action, flush=True)
         new_board = board.execute_move(action, player)
         # new_board.print_board()
-        # xx = input()
         return new_board
 
     def get_valid_moves(self, board, player):
@@ -57,13 +55,10 @@ class GoGame:
         valid_move_indicator = [0]*self.get_action_space_size()
         legal_moves = board.get_legal_moves(player)
 
-        # TODO : Reset this to original
-        valid_move_indicator[-1] = 0
-        valid_move_indicator[-2] = 0
+        valid_move_indicator[-1] = 1
 
         valid_move_indicator = np.asarray(valid_move_indicator)
         valid_move_indicator[legal_moves] = 1
-        # print(valid_move_indicator, flush=True)
         return valid_move_indicator
 
     def get_game_ended(self, board, player):
@@ -97,10 +92,10 @@ class GoGame:
 
     def get_symmetries_numpy(self, numpy_board, pi_, valids, rot_num, flip):
         assert rot_num in [0, 1, 2, 3]
-        assert len(pi_) == self.board_size**2 + 2
-        pi_2d = np.reshape(pi_[:-2], (self.board_size, self.board_size))
+        assert len(pi_) == self.get_action_space_size()
+        pi_2d = np.reshape(pi_[:-1], (self.board_size, self.board_size))
         valids_2d = np.reshape(
-            valids[:-2], (self.board_size, self.board_size))
+            valids[:-1], (self.board_size, self.board_size))
 
         ret = []
 
@@ -120,7 +115,7 @@ class GoGame:
             new_valids = np.fliplr(new_valids)
 
         ret.append((new_board, list(new_pi.ravel()) +
-                    pi_[-2:], np.concatenate((new_valids.ravel(), valids[-2:]))))
+                    pi_[-1:], np.concatenate((new_valids.ravel(), valids[-1:]))))
 
         return ret
 
@@ -156,7 +151,7 @@ class GoGame:
         """
         score = board.score(self.komi)
 
-        if score == 0:
-            return 0
+        # if score == 0:
+        #     return 0
 
         return player if score > 0 else -player

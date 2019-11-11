@@ -3,6 +3,7 @@ File to manage training and predicting fom neural net.
 """
 
 import random
+import time
 
 import numpy as np
 import torch
@@ -32,7 +33,7 @@ class NetTrainer():
             print('Specify neural net type correctly.', flush=True)
 
         if(args.cuda):
-            self.net=self.net.cuda()
+            self.net = self.net.cuda()
 
     def train(self, examples):
         """
@@ -44,6 +45,8 @@ class NetTrainer():
         mse_loss = nn.MSELoss()
 
         for epoch in range(self.args.epochs):
+            start_time = time.time()
+
             self.net.train()
 
             all_ids = list(range(len(examples)))
@@ -56,6 +59,10 @@ class NetTrainer():
 
             while i < len(examples):
                 selected_examples = all_ids[i:i+self.args.batch_size]
+
+                if(len(selected_examples) < 2):
+                    i += self.args.batch_size
+                    continue
 
                 example_batch, pis, valids, vals = list(
                     zip(*[examples[i] for i in selected_examples]))
@@ -71,14 +78,16 @@ class NetTrainer():
                     np.array(vals).astype(np.float64)).reshape(-1, 1)
 
                 if(self.args.cuda):
-                    boards, target_pi, target_v= boards.contiguous().cuda(), target_pi.contiguous().cuda(), target_v.contiguous().cuda()
+                    boards, target_pi, target_v = boards.contiguous().cuda(
+                    ), target_pi.contiguous().cuda(), target_v.contiguous().cuda()
 
                 predicted_pi_log_softmax, predicted_v = self.net(boards)
 
                 target_pi_softmax = F.softmax(target_pi, dim=1)
 
-                loss_pi = -torch.sum(target_pi_softmax*predicted_pi_log_softmax) / \
-                    target_pi.size()[0]
+                loss_pi = - \
+                    torch.sum(target_pi_softmax *
+                              predicted_pi_log_softmax) / target_pi.size()[0]
                 # print(predicted_v.shape,target_v.shape, flush=True)
                 loss_v = mse_loss(predicted_v, target_v)
 
@@ -94,8 +103,8 @@ class NetTrainer():
                 batch_num += 1
                 i += self.args.batch_size
 
-            print('Epoch {}: Loss_pi {} Loss_v {}'.format(
-                epoch, running_loss_pi/batch_num, running_loss_v/batch_num), flush=True)
+            print('Epoch {} Time {} Loss_pi {} Loss_v {}'.format(
+                epoch, time.time()-start_time, running_loss_pi/batch_num, running_loss_v/batch_num), flush=True)
 
     def save_checkpoint(self, path):
         """
@@ -128,4 +137,4 @@ class NetTrainer():
 
         # print(probab_dist, flush=True)
 
-        return torch.exp(pis).data.cpu().numpy()[0], vals.data.cpu().numpy()[0]
+        return probab_dist.data.cpu().numpy()[0], vals.data.cpu().numpy()[0]

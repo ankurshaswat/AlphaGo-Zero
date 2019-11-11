@@ -9,6 +9,8 @@ BLACK = np.array([1, 0, 0])
 WHITE = np.array([0, 1, 0])
 EMPTY = np.array([0, 0, 1])
 
+MAX_MOVES = 250
+
 
 class GoBoard():
     """
@@ -16,7 +18,7 @@ class GoBoard():
     """
 
     def __init__(self, board_size, board=None,
-                 player=-1, done=False, last_passed=False, history=None):
+                 player=-1, done=False, last_passed=False, history=None, move_num=0):
         self.board_size = board_size
 
         self.pass_action = board_size**2
@@ -27,6 +29,7 @@ class GoBoard():
         self.curr_player = player
         self.done = done
         self.last_passed = last_passed
+        self.move_num = move_num
 
         if history is None:
             self.history = [None]*7
@@ -82,8 +85,9 @@ class GoBoard():
 
         if action == self.pass_action:
             last_passed = True
-            done = self.last_passed
-            print('2 Passes Done', flush=True)
+            if self.last_passed:
+                done = True
+                print('2 Passes Done', flush=True)
             new_board = self.board.play(pachi_py.PASS_COORD, curr_player)
         elif action == self.resign_action:
             done = True
@@ -94,31 +98,57 @@ class GoBoard():
             new_board = self.board.play(
                 self.board.ij_to_coord(a_x, a_y), curr_player)
 
+        if self.move_num == -1:
+            move_num = -1
+        elif self.move_num == MAX_MOVES:
+            done = True
+            move_num = self.move_num+1
+        else:
+            move_num = self.move_num+1
+
         new_history = [self.board] + self.history[:6]
         # print(len(new_history), flush=True)
-        return GoBoard(self.board_size, new_board, -1*player, done, last_passed, new_history)
+        return GoBoard(self.board_size, new_board, -1*player, done, last_passed, new_history, move_num)
+
+    def get_legal_moves_old(self, player):
+        """
+        Iterate and find out legal position moves
+        """
+
+        curr_player = pachi_py.BLACK if player == -1 else pachi_py.WHITE
+
+        board_arr = self.board.encode()
+        init_legal_coords = self.board.get_legal_coords(curr_player)
+
+        legal_moves = []
+        # print(init_legal_coords)
+        for coord in init_legal_coords:
+            # print(coord)
+            pos_x, pos_y = self.board.coord_to_ij(coord)
+            if coord >= 0 and self.is_legal_action_old(board_arr, (pos_x, pos_y), curr_player):
+                legal_moves.append(self.board_size*pos_x + pos_y)
+
+        return legal_moves
 
     def get_legal_moves(self, player):
         """
         Iterate and find out legal position moves
         """
-
-        board_arr = self.board.encode()
+        # return self.get_legal_moves_old(player)
 
         curr_player = pachi_py.BLACK if player == -1 else pachi_py.WHITE
 
         init_legal_coords = self.board.get_legal_coords(curr_player)
 
         legal_moves = []
-
         for coord in init_legal_coords:
-            pos_x, pos_y = self.board.coord_to_ij(coord)
-            if self.is_legal_action(board_arr, (pos_x, pos_y), player):
+            if coord >= 0 and self.is_legal_action(coord, curr_player):
+                pos_x, pos_y = self.board.coord_to_ij(coord)
                 legal_moves.append(self.board_size*pos_x + pos_y)
 
         return legal_moves
 
-    def is_legal_action(self, board_arr, action, player):
+    def is_legal_action_old(self, board_arr, action, player):
         """
         Basic checks if the given action on a board is legal
         """
@@ -146,6 +176,18 @@ class GoBoard():
             return True
 
         return False
+
+    def is_legal_action(self, action, player):
+        """
+        Simple is legal action check.
+        """
+        try:
+            # print(action, player)
+            _ = self.board.play(action, player)
+        except pachi_py.IllegalMove:
+            return False
+
+        return True
 
     def print_board(self):
         """

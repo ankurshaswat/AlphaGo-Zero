@@ -12,8 +12,8 @@ class NNet1(nn.Module):
     """
 
     def __init__(self, game, args):
-        self.board_size = game.getBoardSize()
-        self.action_size = game.getActionSpaceSize()
+        self.board_size = game.get_board_size()
+        self.action_size = game.get_action_space_size()
         self.args = args
 
         super(NNet1, self).__init__()
@@ -84,8 +84,8 @@ class NNet2(nn.Module):
     """
 
     def __init__(self, game, args):
-        self.board_size = game.getBoardSize()
-        self.action_size = game.getActionSpaceSize()
+        self.board_size = game.get_board_size()
+        self.action_size = game.get_action_space_size()
         self.args = args
 
         super(NNet2, self).__init__()
@@ -186,7 +186,7 @@ class NNet3(nn.Module):
         s = self.conv3(s)
 
         s = s.view(-1, 128 * (self.board_size-2)*(self.board_size-2))
-
+        # print(s.shape)
         s = self.fc1(s)
 
         pi_probab_dist = self.fc2(s)

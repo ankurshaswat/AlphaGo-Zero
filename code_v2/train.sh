@@ -23,6 +23,7 @@ kill_child_processes() {
 trap "kill_child_processes 1 $$; exit 0" INT
 
 mkdir ../logs
+unique_token="$(date +"%T")"
 
 # python create_new_net.py
 
@@ -30,7 +31,6 @@ mkdir ../logs
 CYCLE_NUM=0
 while [[ $CYCLE_NUM -lt $NUM_CYCLES ]]; do
 
-    unique_token="$(date +"%T")"
 
     echo "Spawning threads for self play."
 
@@ -38,7 +38,7 @@ while [[ $CYCLE_NUM -lt $NUM_CYCLES ]]; do
     CUDA_DEVICE=0
     while [[ $THREAD_NUM -lt $NUM_THREADS ]]; do
         # echo CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[$CUDA_DEVICE]} CUDA_DEVICE_VAR=$CUDA_DEVICE THREAD_NUM=$THREAD_NUM UNIQUE_TOKEN=$unique_token CYCLE_NUM=$CYCLE_NUM
-        CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python game_generator.py -thread_num $THREAD_NUM -unique_token $unique_token >../logs/${unique_token}_a_${CYCLE_NUM}_${THREAD_NUM}_generator.log &
+        CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python game_generator.py -thread_num $THREAD_NUM -unique_token $unique_token >> ../logs/${unique_token}_${THREAD_NUM}.log &
         ((THREAD_NUM = THREAD_NUM + 1))
         ((CUDA_DEVICE = (CUDA_DEVICE + 1) % NUM_GPU))
     done
@@ -46,7 +46,7 @@ while [[ $CYCLE_NUM -lt $NUM_CYCLES ]]; do
     wait
 
     echo "Starting Training."
-    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python train_net.py >../logs/${unique_token}_b_${CYCLE_NUM}_train.log
+    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python train_net.py >> ../logs/${unique_token}.log
 
     echo "Spawning threads for competing."
 
@@ -54,7 +54,7 @@ while [[ $CYCLE_NUM -lt $NUM_CYCLES ]]; do
     CUDA_DEVICE=0
     while [[ $THREAD_NUM -lt $NUM_THREADS ]]; do
         # echo CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[$CUDA_DEVICE]} CUDA_DEVICE_VAR=$CUDA_DEVICE THREAD_NUM=$THREAD_NUM UNIQUE_TOKEN=$unique_token CYCLE_NUM=$CYCLE_NUM
-        CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python compete_with_best.py -thread_num $THREAD_NUM >../logs/${unique_token}_c_${CYCLE_NUM}_${THREAD_NUM}_compete.log &
+        CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python compete_with_best.py -thread_num $THREAD_NUM >> ../logs/${unique_token}_${THREAD_NUM}.log &
         ((THREAD_NUM = THREAD_NUM + 1))
         ((CUDA_DEVICE = (CUDA_DEVICE + 1) % NUM_GPU))
     done
@@ -62,7 +62,7 @@ while [[ $CYCLE_NUM -lt $NUM_CYCLES ]]; do
     wait
 
     echo "Starting result compilation."
-    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python compile_results.py >../logs/${unique_token}_d_${CYCLE_NUM}_compileResults.log
+    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python compile_results.py >> ../logs/${unique_token}.log
 
     rm -rf ../compete_results
 

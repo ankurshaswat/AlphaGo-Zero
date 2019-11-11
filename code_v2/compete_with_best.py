@@ -1,3 +1,6 @@
+"""
+Compete with best model
+"""
 import os
 
 from go_game import GoGame
@@ -20,7 +23,8 @@ if __name__ == "__main__":
     if not os.path.exists('../compete_results'):
         os.makedirs('../compete_results')
 
-    print('ThreadNUm {} OldWins {} NewWins {}'.format(
-        ARGS.thread_num, OLD_WIN_COUNT, NEW_WIN_COUNT), flush=True)
+    print('OldWins {} NewWins {}'.format(
+        OLD_WIN_COUNT, NEW_WIN_COUNT), flush=True)
+
     with open('../compete_results/' + str(ARGS.thread_num) + '.txt', 'w') as file:
         file.write(str(OLD_WIN_COUNT) + ' ' + str(NEW_WIN_COUNT))
