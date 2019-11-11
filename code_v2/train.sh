@@ -32,23 +32,23 @@ CYCLE_NUM=0
 while [[ $CYCLE_NUM -lt $NUM_CYCLES ]]; do
 
 
-    echo "Spawning threads for self play."
+    # echo "Spawning threads for self play."
 
-    THREAD_NUM=0
-    CUDA_DEVICE=0
-    while [[ $THREAD_NUM -lt $NUM_THREADS ]]; do
-        # echo CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[$CUDA_DEVICE]} CUDA_DEVICE_VAR=$CUDA_DEVICE THREAD_NUM=$THREAD_NUM UNIQUE_TOKEN=$unique_token CYCLE_NUM=$CYCLE_NUM
-        CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python game_generator.py -thread_num $THREAD_NUM -unique_token $unique_token >> ../logs/${unique_token}_${THREAD_NUM}.log &
-        ((THREAD_NUM = THREAD_NUM + 1))
-        ((CUDA_DEVICE = (CUDA_DEVICE + 1) % NUM_GPU))
-    done
+    # THREAD_NUM=0
+    # CUDA_DEVICE=0
+    # while [[ $THREAD_NUM -lt $NUM_THREADS ]]; do
+    #     # echo CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[$CUDA_DEVICE]} CUDA_DEVICE_VAR=$CUDA_DEVICE THREAD_NUM=$THREAD_NUM UNIQUE_TOKEN=$unique_token CYCLE_NUM=$CYCLE_NUM
+    #     CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python game_generator.py -thread_num $THREAD_NUM -unique_token $unique_token >> ../logs/${unique_token}_${THREAD_NUM}.log &
+    #     ((THREAD_NUM = THREAD_NUM + 1))
+    #     ((CUDA_DEVICE = (CUDA_DEVICE + 1) % NUM_GPU))
+    # done
 
-    wait
+    # wait
 
-    echo "Starting Training."
-    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python train_net.py >> ../logs/${unique_token}.log
+    # echo "Starting Training."
+    # CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[0]} python train_net.py >> ../logs/${unique_token}.log
 
-    echo "Spawning threads for competing."
+    # echo "Spawning threads for competing."
 
     THREAD_NUM=0
     CUDA_DEVICE=0

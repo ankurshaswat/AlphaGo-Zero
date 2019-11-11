@@ -125,6 +125,7 @@ class GoGame:
         Only concat of board_size*board_size*16 array is returned.
         """
         np_arr = self.get_numpy_rep(board, player, history)
+        # board.print_board()
         return self.convert_np_to_string(np_arr)
 
     def convert_np_to_string(self, np_arr):
@@ -133,6 +134,19 @@ class GoGame:
         """
         correctly_ordered_np_arr = np_arr.transpose(2, 0, 1)
         # print(correctly_ordered_np_arr.shape)
+        # print(correctly_ordered_np_arr,flush=True)
+
+        # i=0
+        # string = ""
+        # for char in "".join(str(x) for x in correctly_ordered_np_arr.ravel()):
+        #     if i%13==0:
+        #         print(string)
+        #         string = ""
+        #     if i%169==0:
+        #         print()
+        #     string += char
+        #     i+=1
+        # print(string)
         return "".join(str(x) for x in correctly_ordered_np_arr.ravel())
 
     def get_score(self, board, player):

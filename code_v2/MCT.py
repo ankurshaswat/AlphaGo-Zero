@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-import pachi_py
 
 EPS = 1e-8
 
@@ -29,8 +28,6 @@ class MCT(object):
 
         # self.Es = {}        # stores game.getGameEnded ended for board s
         #self.Vs = {}        # stores game.getValidMoves for board s
-
-        self.MAX_MOVES = 250
 
         self.numSimulations = args.numSimulations
         self.args = args

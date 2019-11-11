@@ -27,7 +27,6 @@ def generate_episodes(nnet, game, args):  # self play
 
     num_steps = 0
 
-
     temp = 1
     for epi in range(num_epis):
         episode = []
@@ -62,9 +61,9 @@ def generate_episodes(nnet, game, args):  # self play
             next_action = np.random.choice(len(action_prob), p=action_prob)
 
             board = game.get_next_state(board, player, next_action)
-            #print(next_action)
-            #board.print_board()
-            #print(player,next_action,flush=True)
+            # print(next_action)
+            # board.print_board()
+            # print(player,next_action,flush=True)
             # update player
             player = -player
 
@@ -81,7 +80,7 @@ def generate_episodes(nnet, game, args):  # self play
 
         #print("Episode {}/{} completed".format(epi, num_epis), flush=True)
         print("Episode {}/{} completed in time {:.2f}s".format(epi +
-                                                               1, num_epis, time.time()-start_time),flush=True)
+                                                               1, num_epis, time.time()-start_time), flush=True)
         train += episode
 
     return train
@@ -124,13 +123,13 @@ def compete(old_nnet, new_nnet, game, args):
 
             # get action probabilities
             action_prob = mct_dict[curr_player].actionProb(
-                board, curr_player, 0)
-
+                board, curr_player, 1)
+            # print(curr_player, action_prob, flush=True)
             # pick action and play
             #next_action = np.argmax(action_prob)
-            next_action = np.random.choice(len(action_prob),p=action_prob)
+            next_action = np.random.choice(len(action_prob), p=action_prob)
             board = game.get_next_state(board, curr_player, next_action)
-            #print(curr_player,next_action,flush=True)
+            # print(curr_player, next_action, flush=True)
             curr_player = -curr_player
 
             # check if game has ended (or max moves exceeded)

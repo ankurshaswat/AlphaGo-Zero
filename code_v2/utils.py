@@ -10,8 +10,8 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description='Generate New Games.')
 
-    #parser.add_argument('-cuda', action='store_true', default=False)
-    parser.add_argument('-cuda', action='store_true', default=True)
+    parser.add_argument('-cuda', action='store_true', default=False)
+    # parser.add_argument('-cuda', action='store_true', default=True)
 
     parser.add_argument('-new_path', action='store',
                         dest="new_path", default='../new_examples/')
