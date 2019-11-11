@@ -2,15 +2,14 @@
 Generate new episodes of self play.
 """
 
+import time
+
 import numpy as np
 
 from MCT import MCT
 
 BLACK = -1
 WHITE = 1
-
-MAX_STEPS_FOR_EPISODES = 250#13*13
-MAX_STEPS_FOR_COMPETITION_GAMES = 250#13*13
 
 
 def generate_episodes(nnet, game, args):  # self play
@@ -36,6 +35,7 @@ def generate_episodes(nnet, game, args):  # self play
     temp = 1
     for epi in range(num_epis):
         episode = []
+        start_time = time.time()
         while True:
             # print("Num_steps:",num_steps,flush=True)
             num_steps += 1
@@ -69,7 +69,7 @@ def generate_episodes(nnet, game, args):  # self play
 
             reward = None
 
-            if(num_steps >= MAX_STEPS_FOR_EPISODES) or board.is_terminal():  # maximum steps reached
+            if board.is_terminal():  # maximum steps reached
                 reward = game.decide_winner(board, player)
 
             if reward is not None:
@@ -78,7 +78,9 @@ def generate_episodes(nnet, game, args):  # self play
                     episode[i][-1] = reward
                 break
 
-        print("Episode {}/{} completed".format(epi, num_epis), flush=True)
+        #print("Episode {}/{} completed".format(epi, num_epis), flush=True)
+        print("Episode {}/{} completed in time {:.2f}s".format(epi +
+                                                          1, num_epis, time.time()-start_time))
         train += episode
 
     return train
@@ -114,6 +116,8 @@ def compete(old_nnet, new_nnet, game, args):
         curr_player = BLACK
         num_steps = 0
 
+        start_time = time.time()
+
         while True:
             num_steps += 1
 
@@ -129,7 +133,7 @@ def compete(old_nnet, new_nnet, game, args):
             curr_player = -curr_player
 
             # check if game has ended (or max moves exceeded)
-            if(num_steps >= MAX_STEPS_FOR_COMPETITION_GAMES) or board.is_terminal():  # maximum steps reached
+            if board.is_terminal():  # maximum steps reached
                 break
 
         reward = game.decide_winner(board, BLACK)
@@ -143,6 +147,7 @@ def compete(old_nnet, new_nnet, game, args):
 
         # print("Old score:{}, New score:{}".format(old[1],new[1]), flush=True)
 
-    print("Old score:{}, New score:{}".format(old[1],new[1]), flush=True)
+        print("Old score:{}, New score:{} Time:{:.2f}s".format(
+            old[1], new[1], time.time()-start_time),flush=True)
 
     return old[1], new[1]

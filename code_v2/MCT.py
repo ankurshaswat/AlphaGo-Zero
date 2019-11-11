@@ -88,7 +88,7 @@ class MCT(object):
         '''
         return probs
 
-    def search(self, board, player, moveCount=1):
+    def search(self, board, player):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -113,16 +113,13 @@ class MCT(object):
         s = self.game.get_string_rep(board, player, history=False)
         #-----------------------------------#
 
-        if(moveCount <= self.MAX_MOVES):
-            if s not in self.Es:
-                self.Es[s] = self.game.get_game_ended(board, player)
-                # print("Winner:",self.Es[s], flush=True)
+        # if s not in self.Es:
+        self.Es[s] = self.game.get_game_ended(board, player)
+            # print("Winner:",self.Es[s], flush=True)
 
-            if self.Es[s] != 0:
-                # terminal node
-                return -self.Es[s]
-        else:
-            return -self.game.decide_winner(board, player)
+        if self.Es[s] != 0:
+            # terminal node
+            return -self.Es[s]
 
         if s not in self.Ps:
             # leaf node
@@ -144,6 +141,8 @@ class MCT(object):
                 # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
                 # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.
                 # TODO : print("All valid moves were masked, do workaround.", flush=True)
+                print("All valid moves were masked, do workaround.",
+                      valids, flush=True)
                 self.Ps[s] = self.Ps[s] + valids
                 self.Ps[s] /= np.sum(self.Ps[s])
 
@@ -153,7 +152,7 @@ class MCT(object):
 
         valids = self.Vs[s]
         cur_best = -float('inf')
-        best_act = 169  # -1
+        best_act = self.game.get_action_space_size()-1  # -1
 
         # pick the action with the highest upper confidence bound
         for a in range(self.game.get_action_space_size()):
@@ -176,7 +175,7 @@ class MCT(object):
         next_player = -player
         # next_s = self.game.getCanonicalForm(next_s, next_player)
 
-        v = self.search(next_s, -player, moveCount+1)
+        v = self.search(next_s, next_player)
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] *
