@@ -22,13 +22,13 @@ def parse_args():
     parser.add_argument('-unique_token', action='store',
                         dest="unique_token", default='notSpecified')
     parser.add_argument('-numEpisodes', action='store',
-                        dest='numEpisodes', type=int, default=1)#10
+                        dest='numEpisodes', type=int, default=10)#10
     parser.add_argument('-numSimulations', action='store',
                         dest='numSimulations', type=int, default=100)#100
     parser.add_argument('-cpuct', action='store',
                         dest='cpuct', type=float, default=1.0)
     parser.add_argument('-numStepsForTempChange', action='store',
-                        dest='numStepsForTempChange', type=int, default=15)
+                        dest='numStepsForTempChange', type=int, default=30)
     parser.add_argument('-netType', action='store',
                         dest='type', type=int, default=3)
     parser.add_argument('-history', action='store_true',
@@ -42,7 +42,7 @@ def parse_args():
     parser.add_argument('-l2_regularization', action='store',
                         dest='l2_regularization', type=float, default=1e-5)
     parser.add_argument('-epochs', action='store',
-                        dest='epochs', type=int, default=1)#10
+                        dest='epochs', type=int, default=10)#10
     parser.add_argument('-batch_size', action='store',
                         dest='batch_size', type=int, default=64)
     parser.add_argument('-numGamesPerSide', action='store',

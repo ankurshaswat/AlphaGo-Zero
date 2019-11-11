@@ -4,6 +4,15 @@ import numpy as np
 
 EPS = 1e-8
 
+NOISE_WEIGHT=0.25
+
+def add_noise(probs):
+    probs=np.array(probs)
+    probs= (1-NOISE_WEIGHT)*probs+ NOISE_WEIGHT* np.random.dirichlet([0.03]*len(probs),1)
+    probs=probs.squeeze()
+    return probs
+    # return [i for i in probs]
+
 
 class MCT(object):
     def __init__(self, nnet, game, args):
@@ -18,7 +27,7 @@ class MCT(object):
         self.Es = {}        # stores game.getGameEnded ended for board s
         self.Vs = {}        # stores game.getValidMoves for board s
 
-        self.MAX_MOVES = 200
+        self.MAX_MOVES = 250
 
         self.numSimulations = args.numSimulations
         self.args = args
@@ -26,6 +35,7 @@ class MCT(object):
         # self.n_sa={}
         # self.n_s={}
         # self.valid_s={}
+
 
     def actionProb(self, board, player, temp=1):
         """
@@ -52,6 +62,30 @@ class MCT(object):
         counts = [x**(1./temp) for x in counts]
         # print(counts, flush=True)
         probs = [x/float(sum(counts)) for x in counts]
+
+        probs=add_noise(probs)
+
+        valids=self.Vs[s]
+        probs=probs*valids
+
+        probs/=np.sum(probs)
+        probs=[i for i in probs]
+
+        # print("DEBUG: {} {}".format(type(probs),len(probs)),flush=True)
+
+        '''
+        #add dirichlet noise
+
+        probs=np.array(probs)
+        print("probs.shape:",probs.shape, flush=True)
+        print(probs[:3])
+        probs= (1-NOISE_WEIGHT)*probs+ NOISE_WEIGHT* np.random.dirichlet([0.03]*len(probs),1)
+        probs=probs.squeeze()
+        print("probs.shape:",probs.shape, flush=True)
+        print(probs[:3])
+        
+        # xx=input()
+        '''
         return probs
 
     def search(self, board, player, moveCount=1):

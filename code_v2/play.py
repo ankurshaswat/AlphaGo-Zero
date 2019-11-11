@@ -37,6 +37,7 @@ def generate_episodes(nnet, game, args):  # self play
     for epi in range(num_epis):
         episode = []
         while True:
+            # print("Num_steps:",num_steps,flush=True)
             num_steps += 1
             if num_steps >= num_steps_temp_thresh:
                 temp = 0
@@ -77,7 +78,7 @@ def generate_episodes(nnet, game, args):  # self play
                     episode[i][-1] = reward
                 break
 
-        print("Episode {}/{} completed".format(epi, num_epis))
+        print("Episode {}/{} completed".format(epi, num_epis), flush=True)
         train += episode
 
     return train
@@ -88,6 +89,8 @@ def compete(old_nnet, new_nnet, game, args):
     Compete trained NN with old NN
     """
     num_games_per_side = args.numGamesPerSide
+
+    print("num_games_per_side:{}".format(num_games_per_side),flush=True)
 
     # stores [net,score], score is updated as games are played
     old = [old_nnet, 0]
@@ -138,6 +141,8 @@ def compete(old_nnet, new_nnet, game, args):
             player_dict[BLACK][1] += 0.5
             player_dict[WHITE][1] += 0.5
 
-        print("Old score:{}, New score:{}".format(old[1],new[1]))
+        # print("Old score:{}, New score:{}".format(old[1],new[1]), flush=True)
+
+    print("Old score:{}, New score:{}".format(old[1],new[1]), flush=True)
 
     return old[1], new[1]

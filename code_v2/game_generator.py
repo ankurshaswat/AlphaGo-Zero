@@ -25,7 +25,13 @@ if __name__ == "__main__":
     GAME = GoGame(13, 7.5)
 
     NET = NetTrainer(GAME, ARGS)
+    
+    # print("Loading checkpoint",flush=True)
+
     NET.load_checkpoint(ARGS.best_model_path+str(ARGS.type))
+
+
+    # print("Generating episodes",flush=True)
 
     EPIS = generate_episodes(NET, GAME, ARGS)
 
