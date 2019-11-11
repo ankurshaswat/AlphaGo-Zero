@@ -21,6 +21,8 @@ if __name__ == "__main__":
     print('TotalOldWins {} TotalNewWins {}'.format(
         OLD_WIN_COUNT, NEW_WIN_COUNT), flush=True)
 
-    if NEW_WIN_COUNT > OLD_WIN_COUNT:
+    WIN_PERCENT = NEW_WIN_COUNT/(1.0*(NEW_WIN_COUNT+OLD_WIN_COUNT))
+
+    if WIN_PERCENT >= 0.55:
         os.rename(ARGS.temp_model_path+str(ARGS.type),
                   ARGS.best_model_path+str(ARGS.type))

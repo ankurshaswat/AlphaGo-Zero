@@ -4,12 +4,14 @@ import numpy as np
 
 EPS = 1e-8
 
-NOISE_WEIGHT=0.25
+NOISE_WEIGHT = 0.25
+
 
 def add_noise(probs):
-    probs=np.array(probs)
-    probs= (1-NOISE_WEIGHT)*probs+ NOISE_WEIGHT* np.random.dirichlet([0.03]*len(probs),1)
-    probs=probs.squeeze()
+    probs = np.array(probs)
+    probs = (1-NOISE_WEIGHT)*probs + NOISE_WEIGHT * \
+        np.random.dirichlet([0.03]*len(probs), 1)
+    probs = probs.squeeze()
     return probs
     # return [i for i in probs]
 
@@ -35,7 +37,6 @@ class MCT(object):
         # self.n_sa={}
         # self.n_s={}
         # self.valid_s={}
-
 
     def actionProb(self, board, player, temp=1):
         """
@@ -63,13 +64,13 @@ class MCT(object):
         # print(counts, flush=True)
         probs = [x/float(sum(counts)) for x in counts]
 
-        probs=add_noise(probs)
+        probs = add_noise(probs)
 
-        valids=self.Vs[s]
-        probs=probs*valids
+        valids = self.Vs[s]
+        probs = probs*valids
 
-        probs/=np.sum(probs)
-        probs=[i for i in probs]
+        probs /= np.sum(probs)
+        probs = probs.tolist()
 
         # print("DEBUG: {} {}".format(type(probs),len(probs)),flush=True)
 
@@ -107,7 +108,7 @@ class MCT(object):
         Returns:
                 v: the negative of the value of the current canonicalBoard
         """
-
+        # print(player)
         #---string representation of board--#
         # player independent repr, without any history
         s = self.game.get_string_rep(board, player, history=False)
@@ -115,7 +116,7 @@ class MCT(object):
 
         # if s not in self.Es:
         self.Es[s] = self.game.get_game_ended(board, player)
-            # print("Winner:",self.Es[s], flush=True)
+        # print("Winner:",self.Es[s], flush=True)
 
         if self.Es[s] != 0:
             # terminal node
