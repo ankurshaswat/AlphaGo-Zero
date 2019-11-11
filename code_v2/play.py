@@ -61,7 +61,7 @@ def generate_episodes(nnet, game, args):  # self play
 
             board = game.get_next_state(board, player, next_action)
 
-            board.print_board()
+            # board.print_board()
 
             # update player
             player = -player
@@ -77,7 +77,7 @@ def generate_episodes(nnet, game, args):  # self play
                     episode[i][-1] = reward
                 break
 
-        print("Episode {}/{} completed in time {}".format(epi +
+        print("Episode {}/{} completed in time {:.2f}s".format(epi +
                                                           1, num_epis, time.time()-start_time))
         train += episode
 
@@ -141,7 +141,7 @@ def compete(old_nnet, new_nnet, game, args):
             player_dict[BLACK][1] += 0.5
             player_dict[WHITE][1] += 0.5
 
-        print("Old score:{}, New score:{} Time:{}".format(
+        print("Old score:{}, New score:{} Time:{:.2f}s".format(
             old[1], new[1], time.time()-start_time))
 
     return old[1], new[1]

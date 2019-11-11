@@ -67,7 +67,7 @@ class NetTrainer():
                 example_batch, pis, valids, vals = list(
                     zip(*[examples[i] for i in selected_examples]))
                 boards = torch.FloatTensor(
-                    np.array(example_batch).astype(np.float64))
+                    np.array(example_batch).astype(np.float64).transpose(0, 3, 1, 2))
 
                 np_valids = np.asarray(valids)
                 np_pis = np.asarray(pis)
@@ -103,7 +103,7 @@ class NetTrainer():
                 batch_num += 1
                 i += self.args.batch_size
 
-            print('Epoch {} Time {} Loss_pi {} Loss_v {}'.format(
+            print('Epoch {} Time {:.2f}s Loss_pi {:.3f} Loss_v {:.3f}'.format(
                 epoch, time.time()-start_time, running_loss_pi/batch_num, running_loss_v/batch_num), flush=True)
 
     def save_checkpoint(self, path):
