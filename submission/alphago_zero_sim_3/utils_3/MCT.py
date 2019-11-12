@@ -16,8 +16,11 @@ def add_noise(probs):
     # return [i for i in probs]
 
 
+
+
+
 class MCT(object):
-    def __init__(self, nnet, game, args):
+    def __init__(self, nnet, game, args, greedy=False, noise=True):
         self.nnet = nnet
         self.game = game
 
@@ -31,6 +34,9 @@ class MCT(object):
 
         self.numSimulations = args.numSimulations
         self.args = args
+
+        self.greedy=greedy
+        self.noise=noise
         # self.q_sa={}
         # self.n_sa={}
         # self.n_s={}
@@ -43,11 +49,15 @@ class MCT(object):
 
         Returns:
                 probs: a policy vector where the probability of the ith action is
-                           proportional to Nsa[(s,a)]**(1./temp)
+                proportional to Nsa[(s,a)]**(1./temp)
         """
         for _ in range(self.numSimulations):
             # try:
+
+            #set board.move_number to 0
             self.search(board, player)
+
+
             # except pachi_py.IllegalMove:
             # print('Illegal action taken. Continuing.')
             # continue
@@ -66,7 +76,8 @@ class MCT(object):
         # print(counts, flush=True)
         probs = [x/float(sum(counts)) for x in counts]
 
-        probs = add_noise(probs)
+        if(self.noise):
+            probs = add_noise(probs)
 
         valids = self.game.get_valid_moves(board, player)
         #valids = self.Vs[s]
@@ -132,7 +143,10 @@ class MCT(object):
             #---get board representation before feeding to neuralNet---#
             # pass player here as well, another option is to concat player to board repr
             board_repr = self.game.get_numpy_rep(board, player, history=False)
-            self.Ps[s], v = self.nnet.predict(board_repr)
+            if(not self.greedy):
+                self.Ps[s], v = self.nnet.predict(board_repr)
+            else:
+                self.Ps[s], v = self.greedy_action(board, player)
             #------------------------------#
 
             valids = self.game.get_valid_moves(board, player)
@@ -161,7 +175,8 @@ class MCT(object):
         best_act = self.game.get_action_space_size()-1  # -1
 
         # pick the action with the highest upper confidence bound
-        for a in range(self.game.get_action_space_size()):
+        # for a in range(self.game.get_action_space_size()):
+        for a in np.random.permutation(list(range(self.game.get_action_space_size()))):
             if valids[a]:
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct*self.Ps[s][a] * \
@@ -194,6 +209,34 @@ class MCT(object):
 
         self.Ns[s] += 1
         return -v
+
+    def greedy_action(self, board, player):
+
+        valids = self.game.get_valid_moves(board, player)
+
+
+
+        num_actions=len(valids)
+        high_score = 0
+        greedy_action = None
+
+        for action, is_valid in enumerate(valids):
+            if not is_valid:
+                continue
+            new_board = self.game.get_next_state(board, player, action)
+            score = self.game.get_score(new_board, player) 
+            
+            if score >= high_score: # Modify if multiple high scores
+                greedy_action = action # The greedy action
+
+        policy=[0.0]*num_actions
+        policy[action]=1.0
+
+        policy=np.array(policy)
+        value= self.game.get_score(board, player)
+
+
+        return policy, value
 
     # def actionProb(self, board, player, temp=1):
     # 	pass

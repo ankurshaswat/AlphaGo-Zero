@@ -33,8 +33,7 @@ current_args = dotdict({
 'epochs' :  20,
 'batch_size' :  64,
 'numGamesPerSide' :  2,
-'best_model_path' :  '../model_3/best_model.pytorch3',
-'temp_model_path' :  '../model_3/temp_model.pytorch3'
+'best_model_path' :  'model_3/model.pytorch3'
 })
 
 
