@@ -41,6 +41,9 @@ class GoBoard():
         else:
             self.board = board
 
+    def set_move_num(self,move_num):
+        self.move_num = move_num
+
     def coord_to_action(self, action_coord):
         """
         Converts Pachi coordinates to actions

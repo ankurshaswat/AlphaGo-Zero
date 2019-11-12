@@ -10,19 +10,19 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description='Generate New Games.')
 
-    parser.add_argument('-cuda', action='store_true', default=False)
-    # parser.add_argument('-cuda', action='store_true', default=True)
+    #parser.add_argument('-cuda', action='store_true', default=False)
+    parser.add_argument('-cuda', action='store_true', default=True)
 
     parser.add_argument('-new_path', action='store',
                         dest="new_path", default='../new_examples/')
     parser.add_argument('-used_path', action='store',
                         dest="used_path", default='../used_examples/')
     parser.add_argument('-thread_num', action='store',
-                        dest="thread_num", type=int, default=1)
+                        dest="thread_num", type=int, default=0)
     parser.add_argument('-unique_token', action='store',
                         dest="unique_token", default='notSpecified')
     parser.add_argument('-numEpisodes', action='store',
-                        dest='numEpisodes', type=int, default=10)#10
+                        dest='numEpisodes', type=int, default=5)#10
     parser.add_argument('-numSimulations', action='store',
                         dest='numSimulations', type=int, default=100)#100
     parser.add_argument('-cpuct', action='store',
@@ -36,15 +36,15 @@ def parse_args():
     parser.add_argument('-dropout', action='store',
                         dest='dropout', type=float, default=0.2)
     parser.add_argument('-lr', action='store',
-                        dest='lr', type=float, default=0.005)
+                        dest='lr', type=float, default=0.001)
     parser.add_argument('-momentum', action='store',
                         dest='momentum', type=float, default=0.9)
     parser.add_argument('-l2_regularization', action='store',
-                        dest='l2_regularization', type=float, default=1e-5)
+                        dest='l2_regularization', type=float, default=1e-5)#1e-5
     parser.add_argument('-epochs', action='store',
-                        dest='epochs', type=int, default=20)#10
+                        dest='epochs', type=int, default=10)#10
     parser.add_argument('-batch_size', action='store',
-                        dest='batch_size', type=int, default=64)
+                        dest='batch_size', type=int, default=32)
     parser.add_argument('-numGamesPerSide', action='store',
                         dest='numGamesPerSide', type=int, default=2)#10
     parser.add_argument('-best_model_path', action='store',

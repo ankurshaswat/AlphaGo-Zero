@@ -109,3 +109,8 @@ models/
 .vscode
 compete_results/
 submission/alphago_zero_sim_3/model_3/*
+old_models/
+code/temp
+code/temp2
+.vscode
+logs/

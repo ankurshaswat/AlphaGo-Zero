@@ -7,6 +7,8 @@ import time
 import numpy as np
 
 from MCT import MCT
+# from MCT2 import MCT
+# from MCT_orig import MCT
 
 BLACK = -1
 WHITE = 1
@@ -23,9 +25,9 @@ def generate_episodes(nnet, game, args):  # self play
     # training data, to be filled with (state, action_prob, value) as encountered during the game
     train = []
 
-    # mct = MCT(nnet, game, args)
+    mct = MCT(nnet, game, args)
 
-    mct = MCT(nnet, game, args, greedy=True)
+    # mct = MCT(nnet, game, args, greedy=True)
 
     num_steps = 0
 
@@ -94,6 +96,8 @@ def compete(new_nnet, game, args, old_nnet=None):
     """
     Compete trained NN with old NN
     """
+    black_wins = 0
+    white_wins = 0
     num_games_per_side = args.numGamesPerSide
 
     print("num_games_per_side:{}".format(num_games_per_side), flush=True)
@@ -127,8 +131,8 @@ def compete(new_nnet, game, args, old_nnet=None):
 
             # get action probabilities
             if player_dict[curr_player][0] is None:
-                action_prob = game.get_valid_moves(board, curr_player)
-                action_prob /= action_prob/np.sum(action_prob)
+                action_prob = np.asarray(game.get_valid_moves(board, curr_player))
+                action_prob = (action_prob/np.sum(action_prob)).tolist()
             else:
                 action_prob = mct_dict[curr_player].actionProb(
                     board, curr_player, 1)
@@ -146,8 +150,10 @@ def compete(new_nnet, game, args, old_nnet=None):
 
         reward = game.decide_winner(board, BLACK)
         if reward == 1:
+            black_wins += 1
             player_dict[BLACK][1] += 1
         elif reward == -1:
+            white_wins += 1
             player_dict[WHITE][1] += 1
         else:
             player_dict[BLACK][1] += 0.5
@@ -155,7 +161,7 @@ def compete(new_nnet, game, args, old_nnet=None):
 
         # print("Old score:{}, New score:{}".format(old[1],new[1]), flush=True)
 
-        print("Old score:{}, New score:{} Time:{:.2f}s".format(
-            old[1], new[1], time.time()-start_time), flush=True)
+        print("Old score:{}, New score:{} Time:{:.2f}s Black{} White{}".format(
+            old[1], new[1], time.time()-start_time,black_wins,white_wins), flush=True)
 
-    return old[1], new[1]
+    return old[1], new[1],black_wins,white_wins

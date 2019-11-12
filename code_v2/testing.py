@@ -1,3 +1,45 @@
+"""
+Compete with best model
+"""
+import os
+
+from go_game import GoGame
+from NNet import NetTrainer
+from play_tmp import compete
+from utils import parse_args
+
+import random
+
+import torch
+
+import numpy as np
+
+if __name__ == "__main__":
+
+    np.random.seed(0)
+    random.seed(0)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(0)
+
+    ARGS = parse_args()
+    GAME = GoGame(13, 7.5)
+
+    NEW_NET = NetTrainer(GAME, ARGS)
+    NEW_NET.load_checkpoint(ARGS.temp_model_path+str(ARGS.type))
+
+    OLD_WIN_COUNT, NEW_WIN_COUNT, black_win, white_win = compete(NEW_NET, GAME, ARGS, old_nnet=None)
+
+    # if not os.path.exists('../compete_results'):
+        # os.makedirs('../compete_results')
+
+    print('OldWins {} NewWins {}'.format(
+        OLD_WIN_COUNT, NEW_WIN_COUNT), flush=True)
+
+    # with open('../compete_results/' + str(ARGS.thread_num) + '.txt', 'w') as file:
+        # file.write(str(OLD_WIN_COUNT) + ' ' + str(NEW_WIN_COUNT)+' '+ str(black_win) +' '+ str(white_win))
+
+
+'''
 import math
 
 import numpy as np
@@ -27,12 +69,21 @@ class MCT(object):
         self.nnet = nnet
         self.game = game
 
+        # self.Qsa = {}       # stores Q values for s,a (as defined in the paper)
+        # self.Nsa = {}       # stores #times edge s,a was visited
+        # self.Ns = {}        # stores #times board s was visited
+        # self.Ps = {}        # stores initial policy (returned by neural net)
+
+
+
 
         self.edge_visit_cnt={}
         self.state_visit_cnt={}
         self.Q={}
         self.policy={}
 
+        # self.Es = {}        # stores game.getGameEnded ended for board s
+        #self.Vs = {}        # stores game.getValidMoves for board s
 
         self.numSimulations = args.numSimulations
         self.args = args
@@ -41,7 +92,14 @@ class MCT(object):
         self.noise=noise
 
     def actionProb(self, board, player, temp=1):
+        """
+        This function performs numMCTSSims simulations of MCTS starting from
+        canonicalBoard.
 
+        Returns:
+                probs: a policy vector where the probability of the ith action is
+                proportional to Nsa[(s,a)]**(1./temp)
+        """
         for _ in range(self.numSimulations):
             # try: 
             self.search(board, player)
@@ -73,6 +131,8 @@ class MCT(object):
         cnt_with_temp=[]
         for i in cnt:
             cnt_with_temp.append(i**(1.0/temp))
+        # cnt = [x**(1./temp) for x in cnt]
+        # print(counts, flush=True)
         probs = [x/float(sum(cnt)) for x in cnt] #normalize
 
         if(self.noise):
@@ -84,8 +144,8 @@ class MCT(object):
 
         probs /= np.sum(probs)
 
-        # print(probs[probs>0][:5])
-        # xx=input()
+        print(probs[probs>0][:5])
+        xx=input()
 
         
         probs = probs.tolist()
@@ -103,6 +163,7 @@ class MCT(object):
         game_end_result = self.game.get_game_ended(board, player)
 
         if game_end_result != 0:
+            # terminal node
             return -game_end_result
 
         if state not in self.policy: #self.state_visit_cnt: #leaf
@@ -117,17 +178,17 @@ class MCT(object):
             valids = self.game.get_valid_moves(board, player)
             self.policy[state] = self.policy[state]*valids      # masking invalid moves
             
-
-
-            if  np.sum(self.policy[state]) <= 0:
+            if  np.sum(self.policy[state]) == 0:
                 self.policy[state]=self.policy[state]+ valids
                 
             self.policy[state] /= np.sum(self.policy[state])
 
 
+            #self.Vs[s] = valids
             self.state_visit_cnt[state] = 0
             return -value
 
+        #valids = self.Vs[s]
         valids = self.game.get_valid_moves(board, player)
         
         best_action, best_bound= self.game.get_action_space_size()-1, -INF
@@ -148,11 +209,11 @@ class MCT(object):
                     best_action = action
 
     
-        action=best_action
-        
-        next_s = self.game.get_next_state(board, player, action)
+        # next_s, next_player = self.game.getNextState(board, player, a)
+        next_s = self.game.get_next_state(board, player, best_action)
 
         next_player = -player
+        # next_s = self.game.getCanonicalForm(next_s, next_player)
 
         value = self.search(next_s, next_player)
 
@@ -198,6 +259,11 @@ class MCT(object):
 
         return policy, value
 
- 
+    # def actionProb(self, board, player, temp=1):
+    # 	pass
+
+    # def search(self, board, player):
+    # 	pass
 
 
+'''

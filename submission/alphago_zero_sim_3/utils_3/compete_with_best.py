@@ -18,7 +18,8 @@ if __name__ == "__main__":
     NEW_NET = NetTrainer(GAME, ARGS)
     NEW_NET.load_checkpoint(ARGS.temp_model_path+str(ARGS.type))
 
-    OLD_WIN_COUNT, NEW_WIN_COUNT = compete(OLD_NET, NEW_NET, GAME, ARGS)
+    OLD_WIN_COUNT, NEW_WIN_COUNT = compete(
+        NEW_NET, GAME, ARGS, old_nnet=OLD_NET)
 
     if not os.path.exists('../compete_results'):
         os.makedirs('../compete_results')
