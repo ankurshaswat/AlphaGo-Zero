@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append('utils_3/')
+
 import os
 import random
 from MCT import MCT
