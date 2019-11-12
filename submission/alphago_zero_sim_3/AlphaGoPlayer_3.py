@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument('-numGamesPerSide', action='store',
                         dest='numGamesPerSide', type=int, default=2)#10
     parser.add_argument('-best_model_path', action='store',
-                        dest='best_model_path', default='../models/best_model.pytorch')
+                        dest='best_model_path', default='model_3/model.pytorch3')
     parser.add_argument('-temp_model_path', action='store',
                         dest='temp_model_path', default='model_3/model.pytorch3')
     args = parser.parse_args([])
@@ -77,7 +77,7 @@ class AlphaGoPlayer():
         self.nnet = NetTrainer(self.game, self.args)
         self.nnet.load_checkpoint(self.args.best_model_path)
 
-        self.mct = MCT(self.nnet, self.game, self.args)
+        self.mct = MCT(self.nnet, self.game, self.args,noise=False)
         
 
 
@@ -87,7 +87,7 @@ class AlphaGoPlayer():
             self.board = self.game.get_next_state(self.board, -1 * self.player, opponent_action)
 
         self.board.set_move_num(0)
-        action_probs = self.mct.actionProb(self.board, self.player, 0,noise=False)
+        action_probs = self.mct.actionProb(self.board, self.player, 0)
         self.board.set_move_num(-1)
 
         best_action = np.argmax(action_probs)
