@@ -14,33 +14,61 @@ import numpy as np
 
 # CHECK BY RUNNING THIS ? AND CHANGE THE IMPORT STATEMENTS
 
+current_args = dotdict({
+'cuda' : True,
+'new_path' :  '../new_examples/',
+'used_path' :  '../used_examples/',
+'thread_num' :  0,
+'unique_token' :  'notSpecified',
+'numEpisodes' :  10,
+'numSimulations' :  100,
+'cpuct' :  1.0,
+'numStepsForTempChange' :  30,
+'type' :  3,
+'history' :  False,
+'dropout' :  0.2,
+'lr' :  0.005,
+'momentum' :  0.9,
+'l2_regularization' :  1e-5,
+'epochs' :  20,
+'batch_size' :  64,
+'numGamesPerSide' :  2,
+'best_model_path' :  '../model_3/best_model.pytorch3',
+'temp_model_path' :  '../model_3/temp_model.pytorch3'
+})
+
+
+
 class AlphaGoPlayer():
-    def __init__(self, init_state, seed, player):
-        self.game = GoGame(init_state) # THe Go Game class
+    def __init__(self, _, seed, player):
+        self.game = GoGame(13,7.5) # THe Go Game class
 
         #THERE IS NO init state
+        self.board = self.game.get_starting_board()
 
-        # self.init_state = init_state
         self.seed = seed
-        self.player = player
 
-        # WHERE ARE WE GETTING THE ARGS FROM ? 
-        self.args = parse_args()
+        self.player = -1 if player == 1 else 1
+
+        self.args = current_args
         self.nnet = NetTrainer(self.game, self.args)
-        self.nnet.load_checkpoint(self.args.best_model_path+str(self.args.type))
+        self.nnet.load_checkpoint(self.args.best_model_path)
 
         self.mct = MCT(self.nnet, self.game, self.args)
         
 
 
-    def get_action(self, cur_state, opponent_action):
+    def get_action(self, _, opponent_action):
 
+        if opponent_action != -1 : # MEANS 
+            self.board = self.game.get_next_state(self.board, -1 * self.player, opponent_action)
 
-        cur_board = self.game.get_next_state(cur_state, -1 * self.player, opponent_action)
-
-        action_probs = self.mct.actionProb(cur_board, self.player, 0)
+        self.board.set_move_num(0)
+        action_probs = self.mct.actionProb(self.board, self.player, 0,noise=False)
+        self.board.set_move_num(-1)
 
         best_action = np.argmax(action_probs)
+        self.board = self.game.get_next_state(self.board,self.player,best_action)
         
         return best_action
         
