@@ -106,6 +106,9 @@ venv.bak/
 new_examples/
 used_examples/
 models/
+.vscode
+compete_results/
+submission/alphago_zero_sim_3/model_3/*
 old_models/
 code/temp
 code/temp2
