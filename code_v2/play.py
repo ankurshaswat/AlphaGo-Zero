@@ -7,6 +7,8 @@ import time
 import numpy as np
 
 from MCT import MCT
+# from MCT_orig import MCT
+
 
 BLACK = -1
 WHITE = 1

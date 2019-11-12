@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # CUDA_DEVICES=(0 1 2 3)
-CUDA_DEVICES=(3 5)
-NUM_THREADS=10 #28
+CUDA_DEVICES=(0 1 2)
+NUM_THREADS=24 #28
 # NUM_CYCLES=5
 
 NUM_GPU=${#CUDA_DEVICES[@]}
@@ -33,7 +33,7 @@ THREAD_NUM=0
 CUDA_DEVICE=0
 while [[ $THREAD_NUM -lt $NUM_THREADS ]]; do
     # echo CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[$CUDA_DEVICE]} CUDA_DEVICE_VAR=$CUDA_DEVICE THREAD_NUM=$THREAD_NUM UNIQUE_TOKEN=$unique_token CYCLE_NUM=$CYCLE_NUM
-    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python compete_with_random.py -thread_num $THREAD_NUM >> ../logs/${unique_token}_${THREAD_NUM}.log &
+    CUDA_VISIBLE_DEVICES=${CUDA_DEVICES[CUDA_DEVICE]} python compete_with_random.py -numGamesPerSide 4 -thread_num $THREAD_NUM >> ../logs/${unique_token}_${THREAD_NUM}.log &
     ((THREAD_NUM = THREAD_NUM + 1))
     ((CUDA_DEVICE = (CUDA_DEVICE + 1) % NUM_GPU))
 done
