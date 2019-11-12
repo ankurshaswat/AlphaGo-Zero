@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from models import NNet1, NNet2, NNet3
+from models import NNet1, NNet2, NNet3, NNet4
 
 
 class NetTrainer():
@@ -29,6 +29,8 @@ class NetTrainer():
             self.net = NNet2(game, args)
         elif self.args.type == 3:
             self.net = NNet3(game, args)
+        elif self.args.type == 4:
+            self.net = NNet4(game, args)
         else:
             print('Specify neural net type correctly.', flush=True)
 
