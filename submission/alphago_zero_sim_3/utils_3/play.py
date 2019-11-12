@@ -23,7 +23,9 @@ def generate_episodes(nnet, game, args):  # self play
     # training data, to be filled with (state, action_prob, value) as encountered during the game
     train = []
 
-    mct = MCT(nnet, game, args)
+    # mct = MCT(nnet, game, args)
+
+    mct = MCT(nnet, game, args, greedy=True)
 
     num_steps = 0
 
@@ -71,6 +73,8 @@ def generate_episodes(nnet, game, args):  # self play
 
             if board.is_terminal():  # maximum steps reached
                 reward = game.decide_winner(board, player)
+                # reward=-reward #flip reward
+
 
             if reward is not None:
                 for i in reversed(range(len(episode))):
@@ -86,7 +90,7 @@ def generate_episodes(nnet, game, args):  # self play
     return train
 
 
-def compete(old_nnet, new_nnet, game, args):
+def compete(new_nnet, game, args, old_nnet=None):
     """
     Compete trained NN with old NN
     """
@@ -122,8 +126,12 @@ def compete(old_nnet, new_nnet, game, args):
             num_steps += 1
 
             # get action probabilities
-            action_prob = mct_dict[curr_player].actionProb(
-                board, curr_player, 1)
+            if player_dict[curr_player][0] is None:
+                action_prob = game.get_valid_moves(board, curr_player)
+                action_prob /= action_prob/np.sum(action_prob)
+            else:
+                action_prob = mct_dict[curr_player].actionProb(
+                    board, curr_player, 1)
             # print(curr_player, action_prob, flush=True)
             # pick action and play
             #next_action = np.argmax(action_prob)

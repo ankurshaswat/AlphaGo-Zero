@@ -35,6 +35,8 @@ if __name__ == "__main__":
         print('No Example file found', flush=True)
         sys.exit()
 
+    print(" {} Number of examples for training.".format(len(ALL_EXAMPLES)))
+
     NEW_NET.train(ALL_EXAMPLES)
     NEW_NET.save_checkpoint(ARGS.temp_model_path+str(ARGS.type))
     NEW_NET.save_checkpoint(ARGS.temp_model_path +
