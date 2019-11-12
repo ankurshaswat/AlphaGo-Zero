@@ -8,6 +8,7 @@ from utils import parse_args
 
 import numpy as np
 
+# CHECK BY RUNNING THIS ? AND CHANGE THE IMPORT STATEMENTS
 
 class AlphaGoPlayer():
     def __init__(self, init_state, seed, player):
