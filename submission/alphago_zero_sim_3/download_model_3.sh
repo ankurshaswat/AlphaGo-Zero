@@ -7,3 +7,4 @@
 # wget -O file https://googledrive.com/host/[ID]
 
 wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1vCsWjyCrBM7xo1pjUo6ttL_tD2SnzdyN' -O model.pytorch3
+mv model.pytorch3 model_3/model.pytorch3
