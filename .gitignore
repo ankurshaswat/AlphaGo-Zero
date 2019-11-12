@@ -106,3 +106,4 @@ venv.bak/
 new_examples/
 used_examples/
 models/
+.vscode
