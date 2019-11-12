@@ -6,7 +6,9 @@ import time
 
 import numpy as np
 
-from MCT import MCT
+# from MCT import MCT
+from MCT2 import MCT
+# from MCT_orig import MCT
 
 BLACK = -1
 WHITE = 1
@@ -129,84 +131,6 @@ def compete(new_nnet, game, args, old_nnet=None):
 
             # get action probabilities
             if player_dict[curr_player][0] is None:
-                action_prob = np.asarray(game.get_valid_moves(board, curr_player))
-                action_prob = (action_prob/np.sum(action_prob)).tolist()
-            else:
-                action_prob = mct_dict[curr_player].actionProb(
-                    board, curr_player, 1)
-            # print(curr_player, action_prob, flush=True)
-            # pick action and play
-            #next_action = np.argmax(action_prob)
-            next_action = np.random.choice(len(action_prob), p=action_prob)
-            board = game.get_next_state(board, curr_player, next_action)
-            # print(curr_player, next_action, flush=True)
-            curr_player = -curr_player
-
-            # check if game has ended (or max moves exceeded)
-            if board.is_terminal():  # maximum steps reached
-                break
-
-        reward = game.decide_winner(board, BLACK)
-        if reward == 1:
-            black_wins += 1
-            player_dict[BLACK][1] += 1
-        elif reward == -1:
-            white_wins += 1
-            player_dict[WHITE][1] += 1
-        else:
-            player_dict[BLACK][1] += 0.5
-            player_dict[WHITE][1] += 0.5
-
-        # print("Old score:{}, New score:{}".format(old[1],new[1]), flush=True)
-
-        print("Old score:{}, New score:{} Time:{:.2f}s Black{} White{}".format(
-            old[1], new[1], time.time()-start_time,black_wins,white_wins), flush=True)
-
-    return old[1], new[1],black_wins,white_wins
-
-def compete_random_greedy(game, args):
-    """
-    Compete trained NN with old NN
-    """
-    black_wins = 0
-    white_wins = 0
-    num_games_per_side = args.numGamesPerSide
-
-    print("num_games_per_side:{}".format(num_games_per_side), flush=True)
-
-    # stores [net,score], score is updated as games are played
-    old = [0, 0]
-    new = [1, 0]
-
-    for game_no in range(num_games_per_side*2):
-
-        if game_no < num_games_per_side:
-            player_dict = {BLACK: old, WHITE: new}
-        else:
-            player_dict = {BLACK: new, WHITE: old}
-
-        if player_dict[BLACK] == new:
-            black_player = MCT(player_dict[BLACK][0], game, args,greedy= True)
-            white_player = MCT(player_dict[WHITE][0], game, args)
-        else:
-            black_player = MCT(player_dict[BLACK][0], game, args)
-            white_player = MCT(player_dict[WHITE][0], game, args,greedy= True)
-
-        mct_dict = {BLACK: black_player, WHITE: white_player}
-
-        # initial board
-        board = game.get_starting_board()
-
-        curr_player = BLACK
-        num_steps = 0
-
-        start_time = time.time()
-
-        while True:
-            num_steps += 1
-
-            # get action probabilities
-            if player_dict[curr_player] == old:
                 action_prob = np.asarray(game.get_valid_moves(board, curr_player))
                 action_prob = (action_prob/np.sum(action_prob)).tolist()
             else:

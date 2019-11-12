@@ -193,3 +193,70 @@ class NNet3(nn.Module):
         val = self.fc3(s)
 
         return F.log_softmax(pi_probab_dist, dim=1), torch.tanh(val)
+
+
+class NNet4(nn.Module):
+    """
+    Neural Net module 4 (Small Net).
+    """
+
+    def __init__(self, game, args):
+        self.board_size = game.get_board_size()
+        self.action_size = game.get_action_space_size()
+        self.args = args
+
+        super(NNet4, self).__init__()
+
+        num_init_channels = 2 if not args.history else 16
+
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(num_init_channels, 8, 3, padding=1),
+            nn.BatchNorm2d(8),
+            nn.ReLU(),
+        )
+
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(8, 16, 3, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+        )
+
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(16, 32, 3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+        )
+
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(32, 64, 3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+        )
+        
+
+        self.fc1 = nn.Sequential(
+            nn.Linear(64*(self.board_size) * (self.board_size), 512),
+            nn.BatchNorm1d(512),
+            nn.Dropout(p=self.args.dropout)
+        )
+
+        self.fc2 = nn.Linear(512, self.action_size)
+        self.fc3 = nn.Linear(512, 1)
+
+    def forward(self, s):
+        s = s.view(-1, 2, self.board_size, self.board_size)
+        s = self.conv1(s)
+        # s_saved = s.clone()
+        s = self.conv2(s)
+        # s += s_saved
+        s = self.conv3(s)
+        s = self.conv4(s)
+
+        s = s.view(-1, 64 * (self.board_size)*(self.board_size))
+        # print(s.shape)
+        s = self.fc1(s)
+
+        pi_probab_dist = self.fc2(s)
+        val = self.fc3(s)
+
+        return F.log_softmax(pi_probab_dist, dim=1), torch.tanh(val)

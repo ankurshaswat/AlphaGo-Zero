@@ -22,7 +22,7 @@ def parse_args():
     parser.add_argument('-unique_token', action='store',
                         dest="unique_token", default='notSpecified')
     parser.add_argument('-numEpisodes', action='store',
-                        dest='numEpisodes', type=int, default=100)#10
+                        dest='numEpisodes', type=int, default=5)#10
     parser.add_argument('-numSimulations', action='store',
                         dest='numSimulations', type=int, default=100)#100
     parser.add_argument('-cpuct', action='store',
@@ -44,9 +44,9 @@ def parse_args():
     parser.add_argument('-epochs', action='store',
                         dest='epochs', type=int, default=10)#10
     parser.add_argument('-batch_size', action='store',
-                        dest='batch_size', type=int, default=64)
+                        dest='batch_size', type=int, default=32)
     parser.add_argument('-numGamesPerSide', action='store',
-                        dest='numGamesPerSide', type=int, default=4)#10
+                        dest='numGamesPerSide', type=int, default=2)#10
     parser.add_argument('-best_model_path', action='store',
                         dest='best_model_path', default='../models/best_model.pytorch')
     parser.add_argument('-temp_model_path', action='store',
