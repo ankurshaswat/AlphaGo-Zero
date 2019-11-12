@@ -23,7 +23,9 @@ def generate_episodes(nnet, game, args):  # self play
     # training data, to be filled with (state, action_prob, value) as encountered during the game
     train = []
 
-    mct = MCT(nnet, game, args)
+    # mct = MCT(nnet, game, args)
+
+    mct = MCT(nnet, game, args, greedy=True)
 
     num_steps = 0
 
@@ -71,6 +73,8 @@ def generate_episodes(nnet, game, args):  # self play
 
             if board.is_terminal():  # maximum steps reached
                 reward = game.decide_winner(board, player)
+                # reward=-reward #flip reward
+
 
             if reward is not None:
                 for i in reversed(range(len(episode))):

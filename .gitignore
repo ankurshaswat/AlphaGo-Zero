@@ -106,3 +106,6 @@ venv.bak/
 new_examples/
 used_examples/
 models/
+old_models/
+code/temp
+code/temp2
